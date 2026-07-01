@@ -8,18 +8,122 @@ https://www.tooplate.com/view/2144-parallax-depth
 
 */
 
-// Generate stars
+// Rede de conexões animada (tema: IA, dados e sistemas)
+// Substitui o antigo campo de estrelas por uma "rede neural" de pontos
+// que se movem, se conectam entre si e reagem ao cursor.
 const starsContainer = document.getElementById('stars');
-const numStars = 100;
 
-for (let i = 0; i < numStars; i++) {
-   const star = document.createElement('div');
-   star.className = 'star';
-   star.style.left = Math.random() * 100 + '%';
-   star.style.top = Math.random() * 100 + '%';
-   star.style.animationDelay = Math.random() * 3 + 's';
-   star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-   starsContainer.appendChild(star);
+if (starsContainer) {
+   const canvas = document.createElement('canvas');
+   canvas.style.width = '100%';
+   canvas.style.height = '100%';
+   canvas.style.display = 'block';
+   starsContainer.appendChild(canvas);
+
+   const ctx = canvas.getContext('2d');
+
+   let netWidth = 0;
+   let netHeight = 0;
+   let nodes = [];
+   const mouse = { x: null, y: null };
+
+   const LINK_DIST = 150;   // distância para ligar dois pontos
+   const MOUSE_DIST = 200;  // distância para ligar ponto ao cursor
+
+   function nodeCount() {
+      // menos pontos em telas pequenas (melhor desempenho)
+      const area = netWidth * netHeight;
+      return Math.min(110, Math.max(40, Math.floor(area / 16000)));
+   }
+
+   function createNodes() {
+      nodes = [];
+      const total = nodeCount();
+      for (let i = 0; i < total; i++) {
+         nodes.push({
+            x: Math.random() * netWidth,
+            y: Math.random() * netHeight,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4
+         });
+      }
+   }
+
+   function resizeNet() {
+      netWidth = window.innerWidth;
+      netHeight = window.innerHeight;
+      canvas.width = netWidth;
+      canvas.height = netHeight;
+      createNodes();
+   }
+
+   window.addEventListener('resize', resizeNet);
+   window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+   });
+   window.addEventListener('mouseout', () => {
+      mouse.x = null;
+      mouse.y = null;
+   });
+
+   function drawNet() {
+      ctx.clearRect(0, 0, netWidth, netHeight);
+
+      // move e desenha cada ponto
+      for (let i = 0; i < nodes.length; i++) {
+         const n = nodes[i];
+         n.x += n.vx;
+         n.y += n.vy;
+
+         if (n.x < 0 || n.x > netWidth) n.vx *= -1;
+         if (n.y < 0 || n.y > netHeight) n.vy *= -1;
+
+         ctx.beginPath();
+         ctx.arc(n.x, n.y, 1.8, 0, Math.PI * 2);
+         ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+         ctx.fill();
+      }
+
+      // liga pontos próximos entre si
+      for (let i = 0; i < nodes.length; i++) {
+         for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < LINK_DIST) {
+               const alpha = (1 - dist / LINK_DIST) * 0.35;
+               ctx.beginPath();
+               ctx.moveTo(nodes[i].x, nodes[i].y);
+               ctx.lineTo(nodes[j].x, nodes[j].y);
+               ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+               ctx.lineWidth = 1;
+               ctx.stroke();
+            }
+         }
+
+         // liga os pontos ao cursor (efeito interativo)
+         if (mouse.x !== null) {
+            const dx = nodes[i].x - mouse.x;
+            const dy = nodes[i].y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MOUSE_DIST) {
+               const alpha = (1 - dist / MOUSE_DIST) * 0.5;
+               ctx.beginPath();
+               ctx.moveTo(nodes[i].x, nodes[i].y);
+               ctx.lineTo(mouse.x, mouse.y);
+               ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+               ctx.lineWidth = 1;
+               ctx.stroke();
+            }
+         }
+      }
+
+      requestAnimationFrame(drawNet);
+   }
+
+   resizeNet();
+   drawNet();
 }
 
 // Parallax scrolling effect
