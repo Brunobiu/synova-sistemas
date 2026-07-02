@@ -4,6 +4,11 @@ import {
   userFormSchema,
   clientContactSchema,
   systemContextSchema,
+  knowledgeDocSchema,
+  aiProviderSchema,
+  allowedOriginsSchema,
+  isValidOrigin,
+  parseOrigins,
 } from "./schema";
 
 describe("systemFormSchema", () => {
@@ -89,5 +94,102 @@ describe("systemContextSchema", () => {
       systemContextSchema.safeParse({ context: "Faz emissão de nota e relatórios.", notes: "obs" })
         .success,
     ).toBe(true);
+  });
+});
+
+describe("knowledgeDocSchema", () => {
+  it("aceita documento válido", () => {
+    expect(
+      knowledgeDocSchema.safeParse({
+        kind: "operational",
+        scope: "system",
+        title: "Como emitir nota",
+        content: "Passo 1... Passo 2...",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("aceita escopo do cliente", () => {
+    expect(
+      knowledgeDocSchema.safeParse({
+        kind: "commercial",
+        scope: "tenant",
+        title: "Tabela de preços",
+        content: "Plano A, Plano B",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejeita tipo/escopo fora do enum", () => {
+    expect(
+      knowledgeDocSchema.safeParse({ kind: "xpto", scope: "system", title: "Ok", content: "c" })
+        .success,
+    ).toBe(false);
+    expect(
+      knowledgeDocSchema.safeParse({ kind: "technical", scope: "global", title: "Ok", content: "c" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("rejeita título curto e conteúdo vazio", () => {
+    expect(
+      knowledgeDocSchema.safeParse({ kind: "custom", scope: "system", title: "a", content: "x" })
+        .success,
+    ).toBe(false);
+    expect(
+      knowledgeDocSchema.safeParse({ kind: "custom", scope: "system", title: "Título", content: "" })
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe("aiProviderSchema", () => {
+  it("aceita config com chave", () => {
+    expect(
+      aiProviderSchema.safeParse({
+        provider: "openai",
+        apiKey: "sk-abcdef123456",
+        chatModel: "gpt-4o-mini",
+        embeddingsModel: "text-embedding-3-small",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("aceita chave vazia (manter a atual no update)", () => {
+    expect(
+      aiProviderSchema.safeParse({ provider: "anthropic", apiKey: "", chatModel: "" }).success,
+    ).toBe(true);
+  });
+
+  it("rejeita chave muito curta e provedor inválido", () => {
+    expect(aiProviderSchema.safeParse({ provider: "google", apiKey: "curta" }).success).toBe(false);
+    expect(aiProviderSchema.safeParse({ provider: "meta", apiKey: "" }).success).toBe(false);
+  });
+});
+
+describe("allowedOriginsSchema / isValidOrigin / parseOrigins", () => {
+  it("valida origens corretas", () => {
+    expect(isValidOrigin("https://app.cliente.com")).toBe(true);
+    expect(isValidOrigin("http://localhost:3000")).toBe(true);
+    expect(isValidOrigin("*")).toBe(true);
+  });
+
+  it("rejeita origens inválidas (com caminho ou sem esquema)", () => {
+    expect(isValidOrigin("cliente.com")).toBe(false);
+    expect(isValidOrigin("https://cliente.com/widget")).toBe(false);
+    expect(isValidOrigin("ftp://cliente.com")).toBe(false);
+  });
+
+  it("parseOrigins quebra por linha/vírgula e remove duplicatas", () => {
+    expect(parseOrigins("https://a.com\nhttps://b.com, https://a.com")).toEqual([
+      "https://a.com",
+      "https://b.com",
+    ]);
+    expect(parseOrigins("  ")).toEqual([]);
+  });
+
+  it("schema aceita lista válida e rejeita inválida", () => {
+    expect(allowedOriginsSchema.safeParse({ origins: ["https://a.com", "*"] }).success).toBe(true);
+    expect(allowedOriginsSchema.safeParse({ origins: ["a.com"] }).success).toBe(false);
   });
 });

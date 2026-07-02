@@ -18,6 +18,11 @@ export function generateApiKeyPair(): ApiKeyPair {
   return { apiKey: `pk_${token(18)}`, secret: `sk_${token(32)}` };
 }
 
+/** Gera apenas um novo segredo (usado na rotação de chave do widget). */
+export function generateSecret(): string {
+  return `sk_${token(32)}`;
+}
+
 export function generateEncryptionKey(): string {
   return randomBytes(32).toString("base64");
 }

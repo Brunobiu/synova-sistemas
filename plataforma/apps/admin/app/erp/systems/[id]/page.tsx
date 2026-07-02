@@ -3,10 +3,13 @@ import { notFound } from "next/navigation";
 import { getSystem } from "@/lib/erp/systems";
 import { ensurePrimaryTenant } from "@/lib/erp/tenants";
 import { listUsers } from "@/lib/erp/users";
+import { listKnowledgeDocs } from "@/lib/erp/knowledge";
 import { SYSTEM_STATUS_LABELS } from "@/lib/erp/schema";
 import { ClientContactForm } from "@/components/erp/client-contact-form";
 import { SystemContextForm } from "@/components/erp/system-context-form";
 import { UsersSection } from "@/components/erp/users-section";
+import { KnowledgeSection } from "@/components/erp/knowledge-section";
+import { WidgetIntegration } from "@/components/erp/widget-integration";
 
 export default async function SystemDetailPage({
   params,
@@ -19,6 +22,7 @@ export default async function SystemDetailPage({
 
   const tenant = await ensurePrimaryTenant(system.id, system.name);
   const users = await listUsers(system.id);
+  const docs = await listKnowledgeDocs(system.id);
   const status = system.status as keyof typeof SYSTEM_STATUS_LABELS;
 
   return (
@@ -35,9 +39,6 @@ export default async function SystemDetailPage({
           <span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
             {system.is_own ? "Próprio" : "Cliente"}
           </span>
-        </div>
-        <div className="mt-2 text-sm text-gray-500">
-          Chave de integração: <code className="break-all">{system.support_api_key}</code>
         </div>
       </div>
 
@@ -74,6 +75,31 @@ export default async function SystemDetailPage({
           widget estiver integrado (bloco 9), novos usuários entram aqui sozinhos.
         </p>
         <UsersSection systemId={system.id} tenantId={tenant.id} users={users} />
+      </section>
+
+      <section className="space-y-3 border-t pt-6">
+        <h2 className="text-lg font-medium">Base de conhecimento</h2>
+        <p className="text-sm text-gray-500">
+          Documentos que a IA consulta para responder: manuais técnicos, procedimentos
+          operacionais, informações comerciais. Escolha o <strong>escopo</strong>: &quot;Todo o
+          sistema&quot; vale para qualquer cliente; &quot;Só do cliente&quot; vale apenas para este.
+          A indexação semântica (busca por similaridade) é ligada no bloco 8, quando as chaves de IA
+          estiverem ativas.
+        </p>
+        <KnowledgeSection systemId={system.id} primaryTenantId={tenant.id} docs={docs} />
+      </section>
+
+      <section className="space-y-3 border-t pt-6">
+        <h2 className="text-lg font-medium">Integração (widget)</h2>
+        <p className="text-sm text-gray-500">
+          Chave e domínios que o widget de suporte usa no site do cliente.
+        </p>
+        <WidgetIntegration
+          systemId={system.id}
+          apiKey={system.support_api_key}
+          allowedOrigins={system.allowed_origins ?? []}
+          secretRotatedAt={system.secret_rotated_at}
+        />
       </section>
     </div>
   );

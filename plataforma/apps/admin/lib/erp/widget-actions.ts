@@ -1,0 +1,38 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/auth";
+import { allowedOriginsSchema } from "@/lib/erp/schema";
+import { updateAllowedOrigins, rotateSystemSecret } from "@/lib/erp/systems";
+
+export type ActionResult = { ok: true } | { ok: false; error: string };
+export type RotateResult = { ok: true; secret: string } | { ok: false; error: string };
+
+export async function saveAllowedOriginsAction(
+  systemId: string,
+  origins: string[],
+): Promise<ActionResult> {
+  await requireAdmin();
+  const parsed = allowedOriginsSchema.safeParse({ origins });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Domínios inválidos." };
+  }
+  try {
+    await updateAllowedOrigins(systemId, parsed.data.origins);
+    revalidatePath(`/erp/systems/${systemId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Não foi possível salvar os domínios." };
+  }
+}
+
+export async function rotateSecretAction(systemId: string): Promise<RotateResult> {
+  await requireAdmin();
+  try {
+    const secret = await rotateSystemSecret(systemId);
+    revalidatePath(`/erp/systems/${systemId}`);
+    return { ok: true, secret };
+  } catch {
+    return { ok: false, error: "Não foi possível rotacionar o segredo." };
+  }
+}

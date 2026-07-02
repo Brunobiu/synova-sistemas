@@ -37,6 +37,8 @@ export interface SystemRow {
   status: EntityStatus;
   support_api_key: string;
   key_secret_hash: string;
+  key_secret_prev_hash: string | null;
+  secret_rotated_at: Ts | null;
   allowed_origins: string[];
   support_config: Json;
   ai_config: Json;

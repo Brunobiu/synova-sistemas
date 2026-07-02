@@ -3,6 +3,7 @@ import { getServerSupabase } from "@/lib/supabase/server";
 import type { SystemFormInput } from "./schema";
 import {
   generateApiKeyPair,
+  generateSecret,
   encryptSecret,
   getEncryptionKey,
   slugify,
@@ -103,4 +104,42 @@ export async function updateSystemContext(
     .update({ context: input.context, notes: input.notes })
     .eq("id", id);
   if (error) throw error;
+}
+
+/** Atualiza a allowlist de domínios que podem embutir o widget (CORS). */
+export async function updateAllowedOrigins(id: string, origins: string[]): Promise<void> {
+  const supabase = await getServerSupabase();
+  const { error } = await supabase
+    .from("systems")
+    .update({ allowed_origins: origins })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+/**
+ * Rotaciona o segredo do widget mantendo o anterior (convivência): o segredo atual
+ * cifrado vai para key_secret_prev_hash e um novo é gerado. A chave pública
+ * (support_api_key) NÃO muda, para não quebrar as instalações existentes.
+ * Retorna o novo segredo em claro para exibir uma única vez.
+ */
+export async function rotateSystemSecret(id: string): Promise<string> {
+  const supabase = await getServerSupabase();
+  const { data: current, error: readErr } = await supabase
+    .from("systems")
+    .select("key_secret_hash")
+    .eq("id", id)
+    .single();
+  if (readErr) throw readErr;
+
+  const newSecret = generateSecret();
+  const { error } = await supabase
+    .from("systems")
+    .update({
+      key_secret_prev_hash: (current as { key_secret_hash: string }).key_secret_hash,
+      key_secret_hash: encryptSecret(newSecret, getEncryptionKey()),
+      secret_rotated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) throw error;
+  return newSecret;
 }

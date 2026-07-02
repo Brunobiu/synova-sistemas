@@ -57,15 +57,16 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
   - [x] 5.4 Testes de entrada/saída
     - _Requisitos: 24_
 
-- [ ] 6. ERP — base de conhecimento e configuração de IA
-  - [ ] 6.1 CRUD de `knowledge_docs` (técnica/operacional/comercial/custom) por sistema e por empresa, com indexação em `knowledge_chunks`
+- [x] 6. ERP — base de conhecimento e configuração de IA
+  - [x] 6.1 CRUD de `knowledge_docs` (técnica/operacional/comercial/custom) por sistema e por empresa, com indexação em `knowledge_chunks`
     - _Requisitos: 3, 6, 11_
-  - [ ] 6.2 Configuração multi-provedor (OpenAI/Anthropic/Google): chave criptografada, modelo, ativar/desativar e teste de conexão
+  - [x] 6.2 Configuração multi-provedor (OpenAI/Anthropic/Google): chave criptografada, modelo, ativar/desativar e teste de conexão
     - _Requisitos: 5, 23_
-  - [ ] 6.3 Integração: exibir snippet do widget, allowlist de domínios e rotação de chave (convivência antiga+nova)
+  - [x] 6.3 Integração: exibir snippet do widget, allowlist de domínios e rotação de chave (convivência antiga+nova)
     - _Requisitos: 7_
-  - [ ] 6.4 Testes (validação, criptografia de chave, escopo/isolamento)
+  - [x] 6.4 Testes (validação, criptografia de chave, escopo/isolamento)
     - _Requisitos: 8, 23, 24_
+    - _Nota: docs salvos no banco; a indexação semântica em `knowledge_chunks` (embeddings) é ligada no Bloco 8, quando as chaves de IA estiverem ativas._
 
 - [ ] 7. Segurança de borda do widget (`packages/shared` + middleware de API)
   - [ ] 7.1 Assinatura/verificação de token (HMAC/JWT) com o segredo do sistema e validação de `support_api_key`
