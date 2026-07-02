@@ -40,6 +40,8 @@ export interface SystemRow {
   allowed_origins: string[];
   support_config: Json;
   ai_config: Json;
+  context: string;
+  notes: string;
   created_at: Ts;
   updated_at: Ts;
 }

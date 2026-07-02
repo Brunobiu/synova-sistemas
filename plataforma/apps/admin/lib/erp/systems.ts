@@ -92,3 +92,15 @@ export async function updateSystem(
 export async function archiveSystem(id: string): Promise<void> {
   await updateSystem(id, { status: "archived" });
 }
+
+export async function updateSystemContext(
+  id: string,
+  input: { context: string; notes: string },
+): Promise<void> {
+  const supabase = await getServerSupabase();
+  const { error } = await supabase
+    .from("systems")
+    .update({ context: input.context, notes: input.notes })
+    .eq("id", id);
+  if (error) throw error;
+}
