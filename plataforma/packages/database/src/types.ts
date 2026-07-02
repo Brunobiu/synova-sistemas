@@ -1,8 +1,10 @@
 // Tipo do banco para o supabase-js.
 //
-// Enquanto o Supabase real não está conectado, usamos um tipo permissivo que
-// permite consultar qualquer tabela/rpc. Quando conectarmos, geramos os tipos
-// reais com `supabase gen types typescript` e substituímos este arquivo.
+// Tipo PERMISSIVO enquanto não geramos os tipos reais. A geração
+// (`supabase gen types typescript`) precisa de Docker (via --db-url) ou de um
+// access token (via --project-id). Quando tivermos um deles, rodamos:
+//   supabase gen types typescript --project-id ndfhkcavdewdjkdoywfh > src/types.ts
+// e substituímos este arquivo pelos tipos reais do schema.
 type AnyRow = Record<string, unknown>;
 
 export type Database = {
