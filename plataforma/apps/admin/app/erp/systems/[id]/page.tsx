@@ -43,6 +43,10 @@ export default async function SystemDetailPage({
 
       <section className="space-y-3 border-t pt-6">
         <h2 className="text-lg font-medium">Cliente</h2>
+        <p className="text-sm text-gray-500">
+          Quem <strong>contratou</strong> o sistema (o contato principal / dono). É um por
+          sistema. Se o projeto é seu, pode deixar em branco.
+        </p>
         <ClientContactForm
           systemId={system.id}
           tenantId={tenant.id}
@@ -64,8 +68,10 @@ export default async function SystemDetailPage({
       <section className="space-y-3 border-t pt-6">
         <h2 className="text-lg font-medium">Usuários</h2>
         <p className="text-sm text-gray-500">
-          Cadastre os usuários do sistema. A IA usa o identificador (ex.: &quot;9&quot;) para
-          saber quem é a pessoa e responder pelo nome.
+          As pessoas que <strong>usam</strong> o sistema e abrem suporte (os funcionários do
+          cliente). Você pode cadastrar vários — cada um no formulário abaixo. A IA usa o
+          identificador (ex.: &quot;9&quot;) para saber quem é e responder pelo nome. Quando o
+          widget estiver integrado (bloco 9), novos usuários entram aqui sozinhos.
         </p>
         <UsersSection systemId={system.id} tenantId={tenant.id} users={users} />
       </section>
