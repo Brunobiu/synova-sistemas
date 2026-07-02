@@ -30,13 +30,13 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 8, 24_
 
 - [ ] 3. Autenticação e autorização do admin
-  - [ ] 3.1 Supabase Auth (e-mail/senha): tela de login, logout e sessão
+  - [x] 3.1 Supabase Auth (e-mail/senha): tela de login, logout e sessão
     - _Requisitos: 18_
-  - [ ] 3.2 `middleware.ts` protegendo `/erp`, `/suporte` e `/api/admin`, com verificação de `role=admin` no servidor
+  - [x] 3.2 `middleware.ts` protegendo `/erp`, `/suporte` e `/api/admin`, com verificação de `role=admin` no servidor
     - _Requisitos: 18_
   - [ ] 3.3 Convite de admins adicionais; rate limit de login; auditoria de acesso
     - _Requisitos: 18, 20, 23_
-  - [ ] 3.4 Testes (acesso negado sem admin; rotas/APIs protegidas)
+  - [x] 3.4 Testes (acesso negado sem admin; rotas/APIs protegidas)
     - _Requisitos: 18, 24_
 
 - [ ] 4. ERP — hub de projetos (systems)

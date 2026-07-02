@@ -1,13 +1,31 @@
-// Tipos do banco gerados pelo Supabase.
-// Depois de conectar o projeto, gere os tipos reais com:
-//   supabase gen types typescript --project-id <PROJECT_ID> > packages/database/src/types.ts
+// Tipo do banco para o supabase-js.
 //
-// Por enquanto, um placeholder para o cliente compilar.
+// Enquanto o Supabase real não está conectado, usamos um tipo permissivo que
+// permite consultar qualquer tabela/rpc. Quando conectarmos, geramos os tipos
+// reais com `supabase gen types typescript` e substituímos este arquivo.
+type AnyRow = Record<string, unknown>;
+
 export type Database = {
   public: {
-    Tables: Record<string, never>;
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Tables: {
+      [table: string]: {
+        Row: AnyRow;
+        Insert: AnyRow;
+        Update: AnyRow;
+        Relationships: [];
+      };
+    };
+    Views: {
+      [view: string]: { Row: AnyRow };
+    };
+    Functions: {
+      [fn: string]: { Args: Record<string, unknown>; Returns: unknown };
+    };
+    Enums: {
+      [name: string]: string;
+    };
+    CompositeTypes: {
+      [name: string]: AnyRow;
+    };
   };
 };
