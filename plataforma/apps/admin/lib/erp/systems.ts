@@ -8,13 +8,22 @@ import {
   slugify,
 } from "./security";
 
-/** Lista os sistemas (opcionalmente filtrando por nome). RLS garante que só admin vê. */
-export async function listSystems(search?: string): Promise<SystemRow[]> {
+export type SystemView = "active" | "archived";
+
+/** Lista os sistemas por visão (ativos = não-arquivados; arquivados). RLS garante que só admin vê. */
+export async function listSystems(
+  search?: string,
+  view: SystemView = "active",
+): Promise<SystemRow[]> {
   const supabase = await getServerSupabase();
   let query = supabase
     .from("systems")
     .select("*")
     .order("created_at", { ascending: false });
+  query =
+    view === "archived"
+      ? query.eq("status", "archived")
+      : query.neq("status", "archived");
   if (search && search.trim()) {
     query = query.ilike("name", `%${search.trim()}%`);
   }

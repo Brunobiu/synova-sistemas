@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { SystemRow } from "@synova/database";
 import { SYSTEM_STATUS_LABELS } from "@/lib/erp/schema";
-import { ArchiveSystemButton } from "./archive-system-button";
+import { SystemStatusButton } from "./system-status-button";
 
 const statusStyle: Record<string, string> = {
   active: "bg-green-100 text-green-700",
@@ -42,7 +42,10 @@ export function SystemCard({ system }: { system: SystemRow }) {
         <Link href={`/erp/systems/${system.id}`} className="text-sm text-gray-500 hover:underline">
           Abrir
         </Link>
-        {status !== "archived" && <ArchiveSystemButton id={system.id} />}
+        <SystemStatusButton
+          id={system.id}
+          mode={status === "archived" ? "restore" : "archive"}
+        />
       </div>
     </div>
   );
