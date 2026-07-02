@@ -39,12 +39,12 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
   - [x] 3.4 Testes (acesso negado sem admin; rotas/APIs protegidas)
     - _Requisitos: 18, 24_
 
-- [ ] 4. ERP — hub de projetos (systems)
-  - [ ] 4.1 Listagem em cards (imagem, status, próprio/cliente) com busca, filtro e reordenação
+- [x] 4. ERP — hub de projetos (systems)
+  - [x] 4.1 Listagem em cards (imagem, status, próprio/cliente) com busca, filtro e reordenação
     - _Requisitos: 2_
-  - [ ] 4.2 CRUD de Sistema (criar/editar/arquivar) com RHF+Zod; geração de `support_api_key` e do segredo (`key_secret`)
+  - [x] 4.2 CRUD de Sistema (criar/editar/arquivar) com RHF+Zod; geração de `support_api_key` e do segredo (`key_secret`)
     - _Requisitos: 2, 7, 16_
-  - [ ] 4.3 Testes de entrada/saída dos formulários e das APIs de Sistema
+  - [x] 4.3 Testes de entrada/saída dos formulários e das APIs de Sistema
     - _Requisitos: 24_
 
 - [ ] 5. ERP — detalhe do sistema (contexto, cliente, usuários)
