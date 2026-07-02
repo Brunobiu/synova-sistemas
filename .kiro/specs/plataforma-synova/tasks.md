@@ -68,15 +68,16 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 8, 23, 24_
     - _Nota: docs salvos no banco; a indexação semântica em `knowledge_chunks` (embeddings) é ligada no Bloco 8, quando as chaves de IA estiverem ativas._
 
-- [ ] 7. Segurança de borda do widget (`packages/shared` + middleware de API)
-  - [ ] 7.1 Assinatura/verificação de token (HMAC/JWT) com o segredo do sistema e validação de `support_api_key`
+- [x] 7. Segurança de borda do widget (`packages/shared` + middleware de API)
+  - [x] 7.1 Assinatura/verificação de token (HMAC/JWT) com o segredo do sistema e validação de `support_api_key`
     - _Requisitos: 7_
-  - [ ] 7.2 CORS por `allowed_origins`, rate limiting por chave/IP e sanitização de erros
+  - [x] 7.2 CORS por `allowed_origins`, rate limiting por chave/IP e sanitização de erros
     - _Requisitos: 7, 23_
-  - [ ] 7.3 Schemas Zod dos endpoints do widget (contratos de entrada/saída)
+  - [x] 7.3 Schemas Zod dos endpoints do widget (contratos de entrada/saída)
     - _Requisitos: 23, 24_
-  - [ ] 7.4 Testes de segurança (chave inválida/expirada, assinatura adulterada, origem não permitida, rate limit)
+  - [x] 7.4 Testes de segurança (chave inválida/expirada, assinatura adulterada, origem não permitida, rate limit)
     - _Requisitos: 7, 8, 23, 24_
+    - _Nota: as primitivas + o guarda `guardWidgetRequest` estão prontos e testados; a fiação nos endpoints HTTP acontece no Bloco 9. O rate limit é em memória (por instância); store compartilhado fica para o Bloco 15._
 
 - [ ] 8. Módulo de IA e motor de contexto (`packages/ai`)
   - [ ] 8.1 Interface `AIProvider` + factory + implementações OpenAI/Anthropic/Google (chat com saída estruturada)

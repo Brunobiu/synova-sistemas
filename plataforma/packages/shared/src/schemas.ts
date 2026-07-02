@@ -34,3 +34,42 @@ export const widgetTicketSchema = z.object({
   priority: z.enum(PRIORITIES).optional(),
 });
 export type WidgetTicketInput = z.infer<typeof widgetTicketSchema>;
+
+/** Query para buscar histórico recente (escopado pelo token). */
+export const widgetHistoryQuerySchema = z.object({
+  sessionId: z.string().uuid().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+});
+export type WidgetHistoryQuery = z.infer<typeof widgetHistoryQuerySchema>;
+
+// --- Contratos de saída (respostas dos endpoints do widget) ---
+
+export const widgetMessageItemSchema = z.object({
+  id: z.string().uuid(),
+  senderType: z.enum(["user", "ai", "admin", "system"]),
+  content: z.string(),
+  createdAt: z.string(),
+});
+export type WidgetMessageItem = z.infer<typeof widgetMessageItemSchema>;
+
+export const widgetSessionResultSchema = z.object({
+  sessionId: z.string().uuid(),
+  chatId: z.string().uuid(),
+  history: z.array(widgetMessageItemSchema),
+});
+export type WidgetSessionResult = z.infer<typeof widgetSessionResultSchema>;
+
+export const widgetMessageResultSchema = z.object({
+  messageId: z.string().uuid(),
+  reply: z.string().optional(),
+  escalated: z.boolean(),
+  ticketId: z.string().uuid().optional(),
+});
+export type WidgetMessageResult = z.infer<typeof widgetMessageResultSchema>;
+
+export const widgetTicketResultSchema = z.object({
+  ticketId: z.string().uuid(),
+  status: z.string(),
+  priority: z.enum(PRIORITIES),
+});
+export type WidgetTicketResult = z.infer<typeof widgetTicketResultSchema>;

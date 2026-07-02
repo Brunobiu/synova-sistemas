@@ -17,6 +17,12 @@ function getSupabaseAnonKey(): string {
   return key;
 }
 
+function getSupabaseServiceKey(): string {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY não definida");
+  return key;
+}
+
 /**
  * Cliente para uso no browser (Client Components).
  */
@@ -31,6 +37,18 @@ export function createSupabaseBrowserClient() {
 export function createSupabaseServerClient(cookies: CookieMethodsServer) {
   return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies,
+  });
+}
+
+/**
+ * Cliente com a SERVICE ROLE (ignora RLS). Uso EXCLUSIVO server-side na borda
+ * pública do widget, que é anônima: o isolamento é garantido no código a partir
+ * do escopo assinado (systemId/tenantId), nunca confiando no input do cliente.
+ * NUNCA use este client em rotas do painel (essas usam o client com sessão + RLS).
+ */
+export function createSupabaseServiceClient() {
+  return createServerClient(getSupabaseUrl(), getSupabaseServiceKey(), {
+    cookies: { getAll: () => [], setAll: () => {} },
   });
 }
 

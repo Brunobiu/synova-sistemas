@@ -94,3 +94,41 @@ export function verifyWidgetToken(token: string, secret: string): VerifyResult {
     },
   };
 }
+
+export interface RotationOptions {
+  /** Segredo anterior (em claro), preservado durante a janela de convivência. */
+  previousSecret?: string | null;
+  /** Momento da rotação (epoch em segundos). */
+  secretRotatedAt?: number | null;
+  /** Duração da janela de convivência em segundos (padrão: 24h). */
+  graceSeconds?: number;
+}
+
+const DEFAULT_GRACE_SECONDS = 86_400; // 24h
+
+/**
+ * Verifica o token aceitando o segredo atual e, se a assinatura não bater e
+ * ainda estivermos dentro da janela de convivência, também o segredo anterior.
+ * Isso permite rotacionar o segredo sem derrubar instalações ativas do widget.
+ */
+export function verifyWidgetTokenRotating(
+  token: string,
+  currentSecret: string,
+  opts: RotationOptions = {},
+): VerifyResult {
+  const primary = verifyWidgetToken(token, currentSecret);
+  // Válido, expirado ou malformado são resultados terminais: só re-tentamos o
+  // segredo anterior quando a assinatura não confere.
+  if (primary.valid || primary.reason !== "bad_signature") return primary;
+
+  const { previousSecret, secretRotatedAt, graceSeconds = DEFAULT_GRACE_SECONDS } = opts;
+  if (!previousSecret) return primary;
+
+  if (typeof secretRotatedAt === "number") {
+    const now = Math.floor(Date.now() / 1000);
+    if (now > secretRotatedAt + graceSeconds) return primary; // janela expirou
+  }
+
+  const fallback = verifyWidgetToken(token, previousSecret);
+  return fallback.valid ? fallback : primary;
+}

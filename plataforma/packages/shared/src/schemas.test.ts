@@ -3,6 +3,8 @@ import {
   widgetMessageSchema,
   widgetTicketSchema,
   scopeSchema,
+  widgetHistoryQuerySchema,
+  widgetMessageResultSchema,
 } from "./schemas";
 
 describe("widgetMessageSchema", () => {
@@ -59,5 +61,41 @@ describe("scopeSchema", () => {
         tenantId: "123e4567-e89b-42d3-a456-556642440000",
       }).success,
     ).toBe(true);
+  });
+});
+
+describe("widgetHistoryQuerySchema", () => {
+  it("aplica limite padrão de 30 e faz coerção de string", () => {
+    const r = widgetHistoryQuerySchema.safeParse({});
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.limit).toBe(30);
+    const r2 = widgetHistoryQuerySchema.safeParse({ limit: "50" });
+    expect(r2.success).toBe(true);
+    if (r2.success) expect(r2.data.limit).toBe(50);
+  });
+
+  it("rejeita limite fora do intervalo", () => {
+    expect(widgetHistoryQuerySchema.safeParse({ limit: 0 }).success).toBe(false);
+    expect(widgetHistoryQuerySchema.safeParse({ limit: 500 }).success).toBe(false);
+  });
+});
+
+describe("widgetMessageResultSchema", () => {
+  it("valida resultado com escalonamento", () => {
+    expect(
+      widgetMessageResultSchema.safeParse({
+        messageId: "550e8400-e29b-41d4-a716-446655440000",
+        escalated: true,
+        ticketId: "123e4567-e89b-42d3-a456-556642440000",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejeita sem o campo escalated", () => {
+    expect(
+      widgetMessageResultSchema.safeParse({
+        messageId: "550e8400-e29b-41d4-a716-446655440000",
+      }).success,
+    ).toBe(false);
   });
 });
