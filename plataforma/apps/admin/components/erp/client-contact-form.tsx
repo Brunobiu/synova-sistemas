@@ -40,7 +40,13 @@ export function ClientContactForm({
       </div>
       <div className="space-y-1">
         <label className="text-sm">Telefone</label>
-        <input className="w-full rounded-md border px-3 py-2 text-sm" {...register("contactPhone")} />
+        <input
+          type="tel"
+          inputMode="tel"
+          placeholder="(62) 99999-9999"
+          className="w-full rounded-md border px-3 py-2 text-sm"
+          {...register("contactPhone")}
+        />
       </div>
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={isSubmitting}>

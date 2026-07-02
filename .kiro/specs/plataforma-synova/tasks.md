@@ -47,14 +47,14 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
   - [x] 4.3 Testes de entrada/saída dos formulários e das APIs de Sistema
     - _Requisitos: 24_
 
-- [ ] 5. ERP — detalhe do sistema (contexto, cliente, usuários)
-  - [ ] 5.1 Tenant primário + contato do cliente (nome/telefone) na visão geral do sistema
+- [x] 5. ERP — detalhe do sistema (contexto, cliente, usuários)
+  - [x] 5.1 Tenant primário + contato do cliente (nome/telefone) na visão geral do sistema
     - _Requisitos: 1, 3_
-  - [ ] 5.2 Editor do "contexto grande do sistema" + anotações; salvar dispara indexação semântica
+  - [x] 5.2 Editor do "contexto grande do sistema" + anotações; salvar dispara indexação semântica
     - _Requisitos: 3, 6, 11_
-  - [ ] 5.3 Cadastro de usuários (`external_ref` "9" → nome/email/cargo/setor)
+  - [x] 5.3 Cadastro de usuários (`external_ref` "9" → nome/email/cargo/setor)
     - _Requisitos: 4_
-  - [ ] 5.4 Testes de entrada/saída
+  - [x] 5.4 Testes de entrada/saída
     - _Requisitos: 24_
 
 - [ ] 6. ERP — base de conhecimento e configuração de IA
