@@ -35,3 +35,5 @@ export function createSupabaseServerClient(cookies: CookieMethodsServer) {
 }
 
 export type { Database };
+export * from "./models";
+export * from "./access";

@@ -13,7 +13,7 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
   - [x] 1.3 Criar esqueleto de `packages/ai` e `packages/ui`; configurar Vitest, ESLint/Prettier e scripts de teste no monorepo
     - _Requisitos: 24_
 
-- [ ] 2. Modelagem do banco e isolamento (Supabase)
+- [x] 2. Modelagem do banco e isolamento (Supabase)
   - [x] 2.1 Migration inicial: `systems`, `tenants`, `users` com índices e integridade referencial
     - _Requisitos: 1, 22_
   - [x] 2.2 Migration: `knowledge_docs` e `knowledge_chunks` (pgvector) + função SQL `match_knowledge` escopada
@@ -22,11 +22,11 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 12, 16, 22_
   - [x] 2.4 Migration: `attachments`, `ai_context`, `notifications`, `audit_logs`, `ai_provider_config`, `profiles` (admins)
     - _Requisitos: 5, 19, 20, 22_
-  - [ ] 2.5 Habilitar RLS e policies (anon negado; admin com leitura ampla; escopo por `system_id`/`tenant_id`) e política append-only de `audit_logs`
+  - [x] 2.5 Habilitar RLS e policies (anon negado; admin com leitura ampla; escopo por `system_id`/`tenant_id`) e política append-only de `audit_logs`
     - _Requisitos: 8, 16, 18, 20_
-  - [ ] 2.6 Gerar tipos TypeScript em `packages/database` e criar helpers de acesso que exigem escopo obrigatório
+  - [x] 2.6 Gerar tipos TypeScript em `packages/database` e criar helpers de acesso que exigem escopo obrigatório
     - _Requisitos: 8, 22_
-  - [ ] 2.7 Testes de isolamento multi-tenant (tentativas cross-tenant devem falhar)
+  - [x] 2.7 Testes de isolamento multi-tenant (tentativas cross-tenant devem falhar)
     - _Requisitos: 8, 24_
 
 - [ ] 3. Autenticação e autorização do admin

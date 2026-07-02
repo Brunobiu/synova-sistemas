@@ -53,5 +53,14 @@ export async function createTestDb() {
     await db.exec(sql);
   }
 
+  // Concede privilégios aos roles (como o Supabase faz), para que seja o RLS —
+  // e não a ausência de grant — a filtrar o acesso nos testes de enforcement.
+  await db.exec(`
+    grant usage on schema public to anon, authenticated;
+    grant select, insert, update, delete on all tables in schema public to authenticated;
+    grant select on all tables in schema public to anon;
+    grant execute on all functions in schema public to anon, authenticated;
+  `);
+
   return db;
 }
