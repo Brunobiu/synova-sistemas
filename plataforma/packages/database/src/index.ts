@@ -21,7 +21,7 @@ function getSupabaseAnonKey(): string {
  * Cliente para uso no browser (Client Components).
  */
 export function createSupabaseBrowserClient() {
-  return createBrowserClient<Database>(getSupabaseUrl(), getSupabaseAnonKey());
+  return createBrowserClient(getSupabaseUrl(), getSupabaseAnonKey());
 }
 
 /**
@@ -29,7 +29,7 @@ export function createSupabaseBrowserClient() {
  * Cada app passa os métodos de cookie do seu framework (ex: next/headers).
  */
 export function createSupabaseServerClient(cookies: CookieMethodsServer) {
-  return createServerClient<Database>(getSupabaseUrl(), getSupabaseAnonKey(), {
+  return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies,
   });
 }
