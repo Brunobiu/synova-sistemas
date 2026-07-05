@@ -17,22 +17,27 @@ export async function listKnowledgeDocs(systemId: string): Promise<KnowledgeDocR
 /**
  * Cria um documento. `tenantId` = null significa base global do sistema (vale para
  * todos os clientes); preenchido significa base específica do cliente.
- * A indexação semântica (embeddings em knowledge_chunks) é feita no bloco 8.
+ * Retorna o id do documento criado (usado para a indexação semântica).
  */
 export async function createKnowledgeDoc(
   systemId: string,
   tenantId: string | null,
   input: KnowledgeDocInput,
-): Promise<void> {
+): Promise<string> {
   const supabase = await getServerSupabase();
-  const { error } = await supabase.from("knowledge_docs").insert({
-    system_id: systemId,
-    tenant_id: tenantId,
-    kind: input.kind,
-    title: input.title,
-    content: input.content,
-  });
+  const { data, error } = await supabase
+    .from("knowledge_docs")
+    .insert({
+      system_id: systemId,
+      tenant_id: tenantId,
+      kind: input.kind,
+      title: input.title,
+      content: input.content,
+    })
+    .select("id")
+    .single();
   if (error) throw error;
+  return (data as { id: string }).id;
 }
 
 export async function updateKnowledgeDoc(

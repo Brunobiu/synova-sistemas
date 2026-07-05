@@ -79,19 +79,20 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 7, 8, 23, 24_
     - _Nota: as primitivas + o guarda `guardWidgetRequest` estão prontos e testados; a fiação nos endpoints HTTP acontece no Bloco 9. O rate limit é em memória (por instância); store compartilhado fica para o Bloco 15._
 
-- [ ] 8. Módulo de IA e motor de contexto (`packages/ai`)
-  - [ ] 8.1 Interface `AIProvider` + factory + implementações OpenAI/Anthropic/Google (chat com saída estruturada)
+- [x] 8. Módulo de IA e motor de contexto (`packages/ai`)
+  - [x] 8.1 Interface `AIProvider` + factory + implementações OpenAI/Anthropic/Google (chat com saída estruturada)
     - _Requisitos: 5, 10_
-  - [ ] 8.2 Embeddings (modelo fixo) e indexação de `knowledge_chunks`
+  - [x] 8.2 Embeddings (modelo fixo) e indexação de `knowledge_chunks`
     - _Requisitos: 11_
-  - [ ] 8.3 Motor de contexto/RAG: precedência empresa>sistema + histórico + tickets + estado, via `match_knowledge` escopado
+  - [x] 8.3 Motor de contexto/RAG: precedência empresa>sistema + histórico + tickets + estado, via `match_knowledge` escopado
     - _Requisitos: 6, 11_
-  - [ ] 8.4 Classificação (intenção/urgência/confiança/prioridade) e decisão de escalonamento
+  - [x] 8.4 Classificação (intenção/urgência/confiança/prioridade) e decisão de escalonamento
     - _Requisitos: 8, 10, 13, 14_
-  - [ ] 8.5 Degradação graciosa (sem chave/timeout → escalar para humano)
+  - [x] 8.5 Degradação graciosa (sem chave/timeout → escalar para humano)
     - _Requisitos: 5, 13, 24_
-  - [ ] 8.6 Testes (saída estruturada, contexto escopado, falha de provedor)
+  - [x] 8.6 Testes (saída estruturada, contexto escopado, falha de provedor)
     - _Requisitos: 10, 11, 24_
+    - _Nota: motor puro testado (37 testes). Indexação roda best-effort ao salvar documento (pula se não houver chave de embeddings). O uso ponta-a-ponta (RAG numa resposta real) é fiado no Bloco 9._
 
 - [ ] 9. Fluxo de atendimento — API pública do widget
   - [ ] 9.1 `POST /api/widget/session` (valida contexto, histórico inicial) e resolução de usuário ("9"→Matheus)

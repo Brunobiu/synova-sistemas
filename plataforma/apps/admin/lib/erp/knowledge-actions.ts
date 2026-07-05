@@ -8,11 +8,29 @@ import {
   updateKnowledgeDoc,
   deleteKnowledgeDoc,
 } from "@/lib/erp/knowledge";
+import { reindexDoc } from "@/lib/ai/indexer";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 function tenantForScope(scope: KnowledgeDocInput["scope"], primaryTenantId: string): string | null {
   return scope === "tenant" ? primaryTenantId : null;
+}
+
+/**
+ * Indexação best-effort: nunca derruba o salvamento. Se não houver provedor de
+ * embeddings configurado, apenas pula (o documento fica salvo mesmo assim).
+ */
+async function tryReindex(
+  systemId: string,
+  docId: string,
+  tenantId: string | null,
+  content: string,
+): Promise<void> {
+  try {
+    await reindexDoc({ docId, systemId, tenantId, content });
+  } catch {
+    // indexação é opcional aqui; erros de embedding não invalidam o documento
+  }
 }
 
 export async function createKnowledgeDocAction(
@@ -23,12 +41,10 @@ export async function createKnowledgeDocAction(
   await requireAdmin();
   const parsed = knowledgeDocSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Dados inválidos." };
+  const tenantId = tenantForScope(parsed.data.scope, primaryTenantId);
   try {
-    await createKnowledgeDoc(
-      systemId,
-      tenantForScope(parsed.data.scope, primaryTenantId),
-      parsed.data,
-    );
+    const docId = await createKnowledgeDoc(systemId, tenantId, parsed.data);
+    await tryReindex(systemId, docId, tenantId, parsed.data.content);
     revalidatePath(`/erp/systems/${systemId}`);
     return { ok: true };
   } catch {
@@ -45,12 +61,10 @@ export async function updateKnowledgeDocAction(
   await requireAdmin();
   const parsed = knowledgeDocSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Dados inválidos." };
+  const tenantId = tenantForScope(parsed.data.scope, primaryTenantId);
   try {
-    await updateKnowledgeDoc(
-      docId,
-      tenantForScope(parsed.data.scope, primaryTenantId),
-      parsed.data,
-    );
+    await updateKnowledgeDoc(docId, tenantId, parsed.data);
+    await tryReindex(systemId, docId, tenantId, parsed.data.content);
     revalidatePath(`/erp/systems/${systemId}`);
     return { ok: true };
   } catch {
