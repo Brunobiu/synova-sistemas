@@ -1,7 +1,7 @@
 // Regras puras de proteção de rota (sem dependência de Supabase),
 // usadas pelo middleware e testáveis isoladamente.
 
-export const PROTECTED_PREFIXES = ["/erp", "/suporte", "/api/admin"] as const;
+export const PROTECTED_PREFIXES = ["/erp", "/meu-atendimento", "/api/admin"] as const;
 
 /** Retorna true se o caminho pertence a uma área protegida (admin). */
 export function isProtectedPath(pathname: string): boolean {

@@ -79,7 +79,7 @@ export default async function SuporteInbox({
                   />
                   {t.chatId && (
                     <Link
-                      href={`/suporte/chats/${t.chatId}`}
+                      href={`/meu-atendimento/chats/${t.chatId}`}
                       className="text-sm text-indigo-600 hover:underline"
                     >
                       Abrir conversa
@@ -101,7 +101,7 @@ export default async function SuporteInbox({
             {chats.map((c) => (
               <Link
                 key={c.id}
-                href={`/suporte/chats/${c.id}`}
+                href={`/meu-atendimento/chats/${c.id}`}
                 className="flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-50"
               >
                 <span>

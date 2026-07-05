@@ -19,8 +19,8 @@ export default async function ErpLayout({ children }: { children: ReactNode }) {
             <Link href="/erp/ia" className="hover:text-gray-900">
               IA
             </Link>
-            <Link href="/suporte" className="hover:text-gray-900">
-              Suporte
+            <Link href="/meu-atendimento" className="hover:text-gray-900">
+              Atendimento
             </Link>
           </nav>
         </div>

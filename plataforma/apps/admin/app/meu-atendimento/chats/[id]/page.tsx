@@ -41,7 +41,7 @@ export default async function ConversationPage({
     <div className="mx-auto max-w-3xl space-y-4">
       <AutoRefresh seconds={5} />
       <div>
-        <Link href="/suporte" className="text-sm text-gray-500 hover:underline">
+        <Link href="/meu-atendimento" className="text-sm text-gray-500 hover:underline">
           ← Voltar à caixa
         </Link>
         <h1 className="mt-1 text-xl font-semibold">

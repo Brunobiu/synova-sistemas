@@ -13,7 +13,7 @@ async function setStatus(id: string, status: "read" | "resolved"): Promise<Resul
   if (status === "read") patch.read_at = new Date().toISOString();
   const { error } = await db.from("notifications").update(patch).eq("id", id);
   if (error) return { ok: false, error: "Não foi possível atualizar." };
-  revalidatePath("/suporte/notificacoes");
+  revalidatePath("/meu-atendimento/notificacoes");
   return { ok: true };
 }
 
@@ -34,6 +34,6 @@ export async function markAllRead(): Promise<Result> {
     .update({ status: "read", read_at: new Date().toISOString() })
     .eq("status", "unread");
   if (error) return { ok: false, error: "Não foi possível atualizar." };
-  revalidatePath("/suporte/notificacoes");
+  revalidatePath("/meu-atendimento/notificacoes");
   return { ok: true };
 }

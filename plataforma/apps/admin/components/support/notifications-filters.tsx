@@ -14,7 +14,7 @@ export function NotificationsFilters({
     const next = new URLSearchParams(params.toString());
     if (value) next.set(key, value);
     else next.delete(key);
-    router.push(`/suporte/notificacoes?${next.toString()}`);
+    router.push(`/meu-atendimento/notificacoes?${next.toString()}`);
   }
 
   return (

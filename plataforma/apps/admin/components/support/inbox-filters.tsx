@@ -14,7 +14,7 @@ export function InboxFilters({
     const next = new URLSearchParams(params.toString());
     if (value) next.set(key, value);
     else next.delete(key);
-    router.push(`/suporte?${next.toString()}`);
+    router.push(`/meu-atendimento?${next.toString()}`);
   }
 
   return (

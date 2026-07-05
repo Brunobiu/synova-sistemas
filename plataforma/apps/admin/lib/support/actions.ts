@@ -54,7 +54,7 @@ export async function replyAction(chatId: string, content: string): Promise<Resu
     targetType: "chat",
     targetId: chat.id,
   });
-  revalidatePath(`/suporte/chats/${chatId}`);
+  revalidatePath(`/meu-atendimento/chats/${chatId}`);
   return { ok: true };
 }
 
@@ -78,8 +78,8 @@ async function setChatMode(
     targetType: "chat",
     targetId: chatId,
   });
-  revalidatePath(`/suporte/chats/${chatId}`);
-  revalidatePath("/suporte");
+  revalidatePath(`/meu-atendimento/chats/${chatId}`);
+  revalidatePath("/meu-atendimento");
   return { ok: true };
 }
 
@@ -150,8 +150,8 @@ export async function reclassifyTicketAction(ticketId: string, priority: string)
     targetId: ticketId,
     metadata: { from: ticket.priority, to: priority },
   });
-  revalidatePath("/suporte");
-  if (ticket.chat_id) revalidatePath(`/suporte/chats/${ticket.chat_id}`);
+  revalidatePath("/meu-atendimento");
+  if (ticket.chat_id) revalidatePath(`/meu-atendimento/chats/${ticket.chat_id}`);
   return { ok: true };
 }
 
@@ -185,7 +185,7 @@ export async function resolveTicketAction(ticketId: string): Promise<Result> {
     targetType: "ticket",
     targetId: ticketId,
   });
-  revalidatePath("/suporte");
-  if (ticket.chat_id) revalidatePath(`/suporte/chats/${ticket.chat_id}`);
+  revalidatePath("/meu-atendimento");
+  if (ticket.chat_id) revalidatePath(`/meu-atendimento/chats/${ticket.chat_id}`);
   return { ok: true };
 }

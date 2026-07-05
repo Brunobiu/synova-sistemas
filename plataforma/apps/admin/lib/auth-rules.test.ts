@@ -2,11 +2,11 @@ import { describe, it, expect } from "vitest";
 import { isProtectedPath, decideAccess } from "./auth-rules";
 
 describe("isProtectedPath", () => {
-  it("protege /erp, /suporte e /api/admin (e subrotas)", () => {
+  it("protege /erp, /meu-atendimento e /api/admin (e subrotas)", () => {
     expect(isProtectedPath("/erp")).toBe(true);
     expect(isProtectedPath("/erp/sistemas")).toBe(true);
-    expect(isProtectedPath("/suporte")).toBe(true);
-    expect(isProtectedPath("/suporte/chats/123")).toBe(true);
+    expect(isProtectedPath("/meu-atendimento")).toBe(true);
+    expect(isProtectedPath("/meu-atendimento/chats/123")).toBe(true);
     expect(isProtectedPath("/api/admin/users")).toBe(true);
   });
 
@@ -21,7 +21,7 @@ describe("isProtectedPath", () => {
 describe("decideAccess", () => {
   it("redireciona para login em rota protegida sem usuário", () => {
     expect(decideAccess("/erp", false)).toBe("redirect-login");
-    expect(decideAccess("/suporte/chats", false)).toBe("redirect-login");
+    expect(decideAccess("/meu-atendimento/chats", false)).toBe("redirect-login");
   });
 
   it("permite rota protegida com usuário", () => {
