@@ -92,7 +92,19 @@ Aqui você vê e responde o que o widget cria. Link "Suporte" no topo do ERP.
 
 Dica: para o ciclo completo, deixe o widget aberto numa aba e o `/suporte` em outra.
 
+## Blocos 14 e 15 — Métricas, auditoria, CI e resiliência
+- [ ] `/suporte/metricas`: tickets por sistema/prioridade/status, taxa de escalonamento e de resolução automática
+- [ ] Ações sensíveis geram log de auditoria (escalonamento, ticket, rotação de chave, acesso negado)
+- [ ] CI (GitHub Actions) roda testes + builds a cada push/PR (`.github/workflows/ci.yml`)
+- [ ] Resiliência: com IA fora/erro/timeout, o atendimento encaminha para humano sem quebrar
+
+## Pré-deploy (quando for publicar na Vercel)
+- Configurar as variáveis do `apps/admin/.env.example` no projeto da Vercel
+- (Opcional) `SENTRY_DSN` para captura de erros
+- Teste de carga manual: `BASE=... KEY=pk_... ORIGIN=... node scripts/load-test.mjs`
+
 ## Como rodar a bateria automatizada
 Na pasta `plataforma`:
 - `pnpm test` — roda todos os testes (deve dar tudo verde)
 - `pnpm --filter @synova/admin build` — confere o build de produção
+- `pnpm build` — builda tudo (widget + admin) via turbo

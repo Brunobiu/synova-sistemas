@@ -4,6 +4,7 @@ import { readWidgetRequest, preflightResponse, widgetError, widgetOk } from "@/l
 import { validateAttachment } from "@/lib/widget/attachments";
 import { buildStoragePath, uploadAttachment, signedUrl } from "@/lib/widget/storage";
 import { insertAttachment, createNotification } from "@/lib/widget/data";
+import { captureError } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,7 +81,8 @@ export async function POST(req: Request) {
       { attachmentId, fileName: check.safeName, mimeType: file.type, size: file.size, url },
       guard.headers,
     );
-  } catch {
+  } catch (err) {
+    captureError(err, { scope: "widget.attachment", systemId: guard.scope.systemId });
     return widgetError({
       status: 500,
       body: apiErr("server_error", "Erro ao enviar o anexo."),

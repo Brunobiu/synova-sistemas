@@ -2,6 +2,7 @@ import { apiErr, widgetHistoryQuerySchema } from "@synova/shared";
 import { guardWidgetRequest } from "@/lib/widget/edge";
 import { readWidgetRequest, preflightResponse, widgetError, widgetOk } from "@/lib/widget/http";
 import { getHistory } from "@/lib/widget/flows";
+import { captureError } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,7 +46,8 @@ export async function GET(req: Request) {
       });
     }
     return widgetOk({ sessionId: res.sessionId, chatId: res.chatId, history: res.history }, guard.headers);
-  } catch {
+  } catch (err) {
+    captureError(err, { scope: "widget.history", systemId: guard.scope.systemId });
     return widgetError({
       status: 500,
       body: apiErr("server_error", "Erro ao buscar o histórico."),

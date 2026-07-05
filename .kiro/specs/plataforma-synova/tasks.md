@@ -159,13 +159,16 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 21, 24_
     - _Nota: auditoria cobre escalonamento, transições/reclassificação de ticket, ações do painel, rotação de chave e acesso negado. Dashboard em `/suporte/metricas` (tickets por sistema/prioridade/status, taxa de escalonamento e de resolução automática). Tempos médios IA/humano e satisfação (CSAT) ficam para evolução (exigem timestamps por mensagem e mecanismo de avaliação). Agregação testada; isolamento garantido por RLS (testes do Bloco 2)._
 
-- [ ] 15. Qualidade, resiliência e portões de pré-deploy
-  - [ ] 15.1 Suíte obrigatória de isolamento multi-tenant + segurança + contratos como portão de CI
+- [x] 15. Qualidade, resiliência e portões de pré-deploy
+  - [x] 15.1 Suíte obrigatória de isolamento multi-tenant + segurança + contratos como portão de CI
     - _Requisitos: 8, 23, 24_
-  - [ ] 15.2 Testes de carga (widget `/message` e painel) e testes de falha (IA fora, timeouts, dependências indisponíveis)
+    - _Nota: `.github/workflows/ci.yml` roda `pnpm test` (RLS/isolamento + segurança de borda + contratos) e os builds (widget + admin) em cada push/PR._
+  - [x] 15.2 Testes de carga (widget `/message` e painel) e testes de falha (IA fora, timeouts, dependências indisponíveis)
     - _Requisitos: 24_
-  - [ ] 15.3 Integração Sentry + logs e verificação de compatibilidade (nenhuma chave interfere em outra; integrações não quebram)
+    - _Nota: falhas cobertas por testes unitários (IA fora/timeout/erro → degradação; rate limit; acesso negado). Teste de carga em `scripts/load-test.mjs` (ferramenta manual contra um servidor no ar)._
+  - [x] 15.3 Integração Sentry + logs e verificação de compatibilidade (nenhuma chave interfere em outra; integrações não quebram)
     - _Requisitos: 23, 24_
+    - _Nota: `lib/observability.ts` faz log estruturado e é drop-in para Sentry via `SENTRY_DSN`; ligado nos catch das rotas do widget. Testes de compatibilidade garantem que a chave/segredo de um sistema não é aceita por outro. `.env.example` documenta as variáveis._
 
 ---
 

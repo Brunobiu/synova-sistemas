@@ -3,6 +3,7 @@ import { guardWidgetRequest } from "@/lib/widget/edge";
 import { readWidgetRequest, preflightResponse, widgetError, widgetOk } from "@/lib/widget/http";
 import { handleMessage } from "@/lib/widget/flows";
 import { logAudit } from "@/lib/audit";
+import { captureError } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -69,7 +70,8 @@ export async function POST(req: Request) {
       { messageId: res.messageId, reply: res.reply, escalated: res.escalated, ticketId: res.ticketId },
       guard.headers,
     );
-  } catch {
+  } catch (err) {
+    captureError(err, { scope: "widget.message", systemId: guard.scope.systemId });
     return widgetError({
       status: 500,
       body: apiErr("server_error", "Erro ao processar a mensagem."),

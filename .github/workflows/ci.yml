@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Portão obrigatório: a suíte de isolamento multi-tenant + segurança + contratos
+# (pnpm test) e os builds precisam passar antes de qualquer merge/deploy.
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: plataforma
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Habilitar pnpm (corepack)
+        run: corepack enable
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Testes (isolamento + segurança + contratos)
+        run: pnpm test
+
+      - name: Build do widget
+        run: pnpm --filter @synova/widget build
+
+      - name: Build do admin
+        run: pnpm --filter @synova/admin build
+        env:
+          # Valores de placeholder só para o build (páginas são dinâmicas; nada real é acessado).
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-key
+          APP_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
