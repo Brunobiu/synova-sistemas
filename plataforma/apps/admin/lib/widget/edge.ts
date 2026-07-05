@@ -34,20 +34,29 @@ export type WidgetGuardResult =
   | { ok: true; scope: WidgetScope; systemAuth: SystemAuth; headers: Record<string, string> }
   | { ok: false; status: number; body: ApiErrorBody; headers: Record<string, string> };
 
+export type KeyOriginResult =
+  | { ok: true; systemAuth: SystemAuth; headers: Record<string, string> }
+  | { ok: false; status: number; body: ApiErrorBody; headers: Record<string, string> };
+
 const DEFAULT_RATE_LIMIT: RateLimitOptions = { limit: 60, windowMs: 60_000 };
 
 function fail(
   code: ApiErrorBody["code"],
   message: string,
   headers: Record<string, string> = {},
-): WidgetGuardResult {
+): { ok: false; status: number; body: ApiErrorBody; headers: Record<string, string> } {
   return { ok: false, status: httpStatusForCode(code), body: apiErr(code, message), headers };
 }
 
-export async function guardWidgetRequest(
-  input: WidgetGuardInput,
+/**
+ * Prefixo do guarda: rate limit + chave + sistema ativo + origem (CORS).
+ * Usado no handshake `/session` (que ainda não tem token) e como base do guarda
+ * completo. Retorna o systemAuth e os cabeçalhos CORS quando passa.
+ */
+export async function guardKeyAndOrigin(
+  input: Omit<WidgetGuardInput, "token">,
   deps: WidgetGuardDeps = {},
-): Promise<WidgetGuardResult> {
+): Promise<KeyOriginResult> {
   const resolveSystem = deps.resolveSystem ?? getSystemAuthByApiKey;
   const limiter = deps.rateLimiter ?? widgetRateLimiter;
   const rateOpts = deps.rateLimit ?? DEFAULT_RATE_LIMIT;
@@ -78,6 +87,17 @@ export async function guardWidgetRequest(
     return fail("forbidden", "Origem não permitida.");
   }
   const headers = corsHeaders(input.origin, system.allowedOrigins);
+
+  return { ok: true, systemAuth: system, headers };
+}
+
+export async function guardWidgetRequest(
+  input: WidgetGuardInput,
+  deps: WidgetGuardDeps = {},
+): Promise<WidgetGuardResult> {
+  const prefix = await guardKeyAndOrigin(input, deps);
+  if (!prefix.ok) return prefix;
+  const { systemAuth: system, headers } = prefix;
 
   // 6) Token assinado obrigatório e válido (aceitando o segredo anterior na janela).
   if (!input.token) return fail("unauthorized", "Token ausente.", headers);

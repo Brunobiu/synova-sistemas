@@ -94,17 +94,18 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 10, 11, 24_
     - _Nota: motor puro testado (37 testes). Indexação roda best-effort ao salvar documento (pula se não houver chave de embeddings). O uso ponta-a-ponta (RAG numa resposta real) é fiado no Bloco 9._
 
-- [ ] 9. Fluxo de atendimento — API pública do widget
-  - [ ] 9.1 `POST /api/widget/session` (valida contexto, histórico inicial) e resolução de usuário ("9"→Matheus)
+- [x] 9. Fluxo de atendimento — API pública do widget
+  - [x] 9.1 `POST /api/widget/session` (valida contexto, histórico inicial) e resolução de usuário ("9"→Matheus)
     - _Requisitos: 4, 9_
-  - [ ] 9.2 `POST /api/widget/message` (persiste, chama IA, responde ou escala)
+  - [x] 9.2 `POST /api/widget/message` (persiste, chama IA, responde ou escala)
     - _Requisitos: 6, 10, 16_
-  - [ ] 9.3 Escalonamento → cria/atualiza ticket + prioridade + notificação + auditoria
+  - [x] 9.3 Escalonamento → cria/atualiza ticket + prioridade + notificação + auditoria
     - _Requisitos: 8, 12, 13, 14, 20_
-  - [ ] 9.4 `POST /api/widget/ticket` (abertura manual) e `GET /api/widget/history` (escopado)
+  - [x] 9.4 `POST /api/widget/ticket` (abertura manual) e `GET /api/widget/history` (escopado)
     - _Requisitos: 12, 16_
-  - [ ] 9.5 Testes de entrada/saída e de fluxo (auto-resposta vs escalonamento)
+  - [x] 9.5 Testes de entrada/saída e de fluxo (auto-resposta vs escalonamento)
     - _Requisitos: 24_
+    - _Nota: handshake `/session` (chave+origem+rate limit) emite o token; os demais exigem token. Escopo forçado no service client. `/message` faz RAG + resposta ou degrada/escala p/ humano. Teste ponta-a-ponta na UI vem com o widget (Bloco 11)._
 
 - [ ] 10. Anexos seguros
   - [ ] 10.1 `POST /api/widget/attachment`: validação de extensão/tamanho, bloqueio de tipos perigosos e limites por tipo
