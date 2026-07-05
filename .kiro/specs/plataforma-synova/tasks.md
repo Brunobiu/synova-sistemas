@@ -107,13 +107,14 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 24_
     - _Nota: handshake `/session` (chave+origem+rate limit) emite o token; os demais exigem token. Escopo forçado no service client. `/message` faz RAG + resposta ou degrada/escala p/ humano. Teste ponta-a-ponta na UI vem com o widget (Bloco 11)._
 
-- [ ] 10. Anexos seguros
-  - [ ] 10.1 `POST /api/widget/attachment`: validação de extensão/tamanho, bloqueio de tipos perigosos e limites por tipo
+- [x] 10. Anexos seguros
+  - [x] 10.1 `POST /api/widget/attachment`: validação de extensão/tamanho, bloqueio de tipos perigosos e limites por tipo
     - _Requisitos: 19, 23_
-  - [ ] 10.2 Storage escopado por `system/tenant` + URLs assinadas e expiráveis; compressão de imagem opcional
+  - [x] 10.2 Storage escopado por `system/tenant` + URLs assinadas e expiráveis; compressão de imagem opcional
     - _Requisitos: 8, 19_
-  - [ ] 10.3 Testes (tipo perigoso, oversize, isolamento de acesso ao arquivo)
+  - [x] 10.3 Testes (tipo perigoso, oversize, isolamento de acesso ao arquivo)
     - _Requisitos: 8, 19, 24_
+    - _Nota: bucket privado `widget-attachments` criado sob demanda no 1º upload; caminho `<system>/<tenant>/<uuid>-<arquivo>`; acesso só por URL assinada (5min). Compressão de imagem ficou como opcional (não implementada). Anexos vinculam-se à mensagem via `attachmentIds`._
 
 - [ ] 11. Widget embutível (`apps/widget`)
   - [ ] 11.1 `embed.js` + `init`; UI flutuante em Shadow DOM; responsiva e com estilo isolado

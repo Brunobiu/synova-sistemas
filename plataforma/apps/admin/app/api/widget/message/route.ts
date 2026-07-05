@@ -38,7 +38,11 @@ export async function POST(req: Request) {
   try {
     const res = await handleMessage(
       guard.scope,
-      { sessionId: parsed.data.sessionId, content: parsed.data.content },
+      {
+        sessionId: parsed.data.sessionId,
+        content: parsed.data.content,
+        attachmentIds: parsed.data.attachmentIds,
+      },
       parts.ip,
     );
     if (!res.ok) {

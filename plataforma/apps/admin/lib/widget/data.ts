@@ -381,6 +381,48 @@ export async function createNotification(params: {
   });
 }
 
+export async function insertAttachment(params: {
+  systemId: string;
+  tenantId: string;
+  userId: string | null;
+  storagePath: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+}): Promise<string> {
+  const db: DB = getServiceSupabase();
+  const { data, error } = await db
+    .from("attachments")
+    .insert({
+      system_id: params.systemId,
+      tenant_id: params.tenantId,
+      user_id: params.userId,
+      storage_path: params.storagePath,
+      file_name: params.fileName,
+      mime_type: params.mimeType,
+      size_bytes: params.sizeBytes,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return (data as { id: string }).id;
+}
+
+/** Vincula anexos a uma mensagem, SEMPRE escopado pelo system_id (isolamento). */
+export async function linkAttachments(
+  attachmentIds: string[],
+  messageId: string,
+  systemId: string,
+): Promise<void> {
+  if (attachmentIds.length === 0) return;
+  const db: DB = getServiceSupabase();
+  await db
+    .from("attachments")
+    .update({ message_id: messageId })
+    .in("id", attachmentIds)
+    .eq("system_id", systemId);
+}
+
 export async function insertAudit(params: {
   systemId: string;
   tenantId: string | null;

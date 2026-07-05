@@ -96,6 +96,7 @@ export async function initSession(input: InitSessionInput, systemAuth: SystemAut
 export interface HandleMessageInput {
   sessionId?: string;
   content: string;
+  attachmentIds?: string[];
 }
 
 export async function handleMessage(
@@ -130,6 +131,11 @@ export async function handleMessage(
     senderId,
     content: input.content,
   });
+
+  // Vincula anexos previamente enviados a esta mensagem (escopado por sistema).
+  if (input.attachmentIds?.length) {
+    await data.linkAttachments(input.attachmentIds, userMsg.id, scope.systemId);
+  }
 
   // Humano no comando (ou IA pausada): registra a mensagem e não responde por IA.
   if (!shouldAIRespond(chat)) {
