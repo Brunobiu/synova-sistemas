@@ -150,13 +150,14 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 24_
     - _Nota: geração feita no fluxo do widget (novo chat/ticket/crítico/escalonamento) + upload de arquivo; central em `/suporte/notificacoes` agrupa por sistema, filtra por sistema/status/prioridade, marca lida/resolvida (sem apagar), críticos destacados, atualização por polling._
 
-- [ ] 14. Auditoria e métricas
-  - [ ] 14.1 Registro de auditoria nas ações sensíveis (chave, acesso negado, escalonamento, transições de ticket, uploads, ações admin)
+- [x] 14. Auditoria e métricas
+  - [x] 14.1 Registro de auditoria nas ações sensíveis (chave, acesso negado, escalonamento, transições de ticket, uploads, ações admin)
     - _Requisitos: 20_
-  - [ ] 14.2 Dashboard de métricas (tickets por sistema/empresa, tempos médios IA/humano, taxa de resolução automática, taxa de escalonamento, satisfação) via views agregadas escopadas
+  - [x] 14.2 Dashboard de métricas (tickets por sistema/empresa, tempos médios IA/humano, taxa de resolução automática, taxa de escalonamento, satisfação) via views agregadas escopadas
     - _Requisitos: 21_
-  - [ ] 14.3 Testes das agregações e do escopo
+  - [x] 14.3 Testes das agregações e do escopo
     - _Requisitos: 21, 24_
+    - _Nota: auditoria cobre escalonamento, transições/reclassificação de ticket, ações do painel, rotação de chave e acesso negado. Dashboard em `/suporte/metricas` (tickets por sistema/prioridade/status, taxa de escalonamento e de resolução automática). Tempos médios IA/humano e satisfação (CSAT) ficam para evolução (exigem timestamps por mensagem e mecanismo de avaliação). Agregação testada; isolamento garantido por RLS (testes do Bloco 2)._
 
 - [ ] 15. Qualidade, resiliência e portões de pré-deploy
   - [ ] 15.1 Suíte obrigatória de isolamento multi-tenant + segurança + contratos como portão de CI

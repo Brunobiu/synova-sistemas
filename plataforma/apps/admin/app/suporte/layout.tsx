@@ -23,6 +23,9 @@ export default async function SuporteLayout({
             <Link href="/suporte/notificacoes" className="hover:text-gray-900">
               Notificações
             </Link>
+            <Link href="/suporte/metricas" className="hover:text-gray-900">
+              Métricas
+            </Link>
             <Link href="/erp" className="hover:text-gray-900">
               ERP
             </Link>

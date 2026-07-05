@@ -2,6 +2,7 @@ import { apiErr, widgetMessageSchema } from "@synova/shared";
 import { guardWidgetRequest } from "@/lib/widget/edge";
 import { readWidgetRequest, preflightResponse, widgetError, widgetOk } from "@/lib/widget/http";
 import { handleMessage } from "@/lib/widget/flows";
+import { logAudit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +19,19 @@ export async function POST(req: Request) {
     token: parts.token,
     ip: parts.ip,
   });
-  if (!guard.ok) return widgetError(guard);
+  if (!guard.ok) {
+    // Acesso negado é auditado (R20). Sem systemId confiável aqui (guarda falhou antes).
+    await logAudit({
+      systemId: null,
+      tenantId: null,
+      actorType: "anonymous",
+      action: "widget.access_denied",
+      targetType: "endpoint",
+      targetId: "message",
+      metadata: { status: guard.status, origin: parts.origin ?? null },
+    });
+    return widgetError(guard);
+  }
 
   let body: unknown = {};
   try {

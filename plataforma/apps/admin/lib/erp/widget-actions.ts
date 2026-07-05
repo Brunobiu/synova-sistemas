@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { allowedOriginsSchema } from "@/lib/erp/schema";
 import { updateAllowedOrigins, rotateSystemSecret } from "@/lib/erp/systems";
+import { logAudit } from "@/lib/audit";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 export type RotateResult = { ok: true; secret: string } | { ok: false; error: string };
@@ -27,9 +28,19 @@ export async function saveAllowedOriginsAction(
 }
 
 export async function rotateSecretAction(systemId: string): Promise<RotateResult> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   try {
     const secret = await rotateSystemSecret(systemId);
+    // Ação sensível (chave): registra na auditoria (sem gravar o segredo).
+    await logAudit({
+      systemId,
+      tenantId: null,
+      actorType: "admin",
+      actorId: admin.id,
+      action: "erp.system.rotate_secret",
+      targetType: "system",
+      targetId: systemId,
+    });
     revalidatePath(`/erp/systems/${systemId}`);
     return { ok: true, secret };
   } catch {
