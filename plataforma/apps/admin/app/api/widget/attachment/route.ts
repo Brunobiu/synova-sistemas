@@ -3,7 +3,7 @@ import { guardWidgetRequest } from "@/lib/widget/edge";
 import { readWidgetRequest, preflightResponse, widgetError, widgetOk } from "@/lib/widget/http";
 import { validateAttachment } from "@/lib/widget/attachments";
 import { buildStoragePath, uploadAttachment, signedUrl } from "@/lib/widget/storage";
-import { insertAttachment } from "@/lib/widget/data";
+import { insertAttachment, createNotification } from "@/lib/widget/data";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,6 +61,21 @@ export async function POST(req: Request) {
       sizeBytes: file.size,
     });
     const url = await signedUrl(path, 300);
+    // Notificação de evento de arquivo (best-effort; não derruba o upload).
+    try {
+      await createNotification({
+        systemId: guard.scope.systemId,
+        tenantId: guard.scope.tenantId,
+        type: "file_uploaded",
+        priority: "baixa",
+        title: "Arquivo enviado pelo cliente",
+        body: check.safeName,
+        entityType: "attachment",
+        entityId: attachmentId,
+      });
+    } catch {
+      /* ignora falha de notificação */
+    }
     return widgetOk(
       { attachmentId, fileName: check.safeName, mimeType: file.type, size: file.size, url },
       guard.headers,

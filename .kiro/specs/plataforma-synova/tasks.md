@@ -141,13 +141,14 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
   - [x] 12.5 Testes de entrada/saída e de fluxo do painel
     - _Requisitos: 24_
 
-- [ ] 13. Central de notificações (somente painel)
-  - [ ] 13.1 Geração em eventos (novo chat/ticket/crítico/escalonamento/arquivo/erro) e agrupamento por sistema/empresa/prioridade/status
+- [x] 13. Central de notificações (somente painel)
+  - [x] 13.1 Geração em eventos (novo chat/ticket/crítico/escalonamento/arquivo/erro) e agrupamento por sistema/empresa/prioridade/status
     - _Requisitos: 12, 13, 17_
-  - [ ] 13.2 Estados (não lida/lida/resolvida) sem apagar, destaque de crítico e atualização em tempo real
+  - [x] 13.2 Estados (não lida/lida/resolvida) sem apagar, destaque de crítico e atualização em tempo real
     - _Requisitos: 15, 16, 17_
-  - [ ] 13.3 Testes
+  - [x] 13.3 Testes
     - _Requisitos: 24_
+    - _Nota: geração feita no fluxo do widget (novo chat/ticket/crítico/escalonamento) + upload de arquivo; central em `/suporte/notificacoes` agrupa por sistema, filtra por sistema/status/prioridade, marca lida/resolvida (sem apagar), críticos destacados, atualização por polling._
 
 - [ ] 14. Auditoria e métricas
   - [ ] 14.1 Registro de auditoria nas ações sensíveis (chave, acesso negado, escalonamento, transições de ticket, uploads, ações admin)
