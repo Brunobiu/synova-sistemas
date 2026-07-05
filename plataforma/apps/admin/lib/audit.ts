@@ -11,6 +11,7 @@ export async function logAudit(params: {
   action: string;
   targetType?: string;
   targetId?: string;
+  ip?: string | null;
   metadata?: Record<string, unknown>;
 }): Promise<void> {
   try {
@@ -23,6 +24,7 @@ export async function logAudit(params: {
       action: params.action,
       target_type: params.targetType ?? null,
       target_id: params.targetId ?? null,
+      ip: params.ip ?? null,
       metadata: params.metadata ?? {},
     });
   } catch {

@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { loginSchema, type LoginInput } from "@/lib/auth/schema";
+import { loginAction } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui/button";
 
-const schema = z.object({
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "Mínimo de 6 caracteres"),
-});
-type FormValues = z.infer<typeof schema>;
+/** Formata segundos como "M min SS s" (ou "SS s" quando abaixo de 1 min). */
+function formatTempo(totalSegundos: number): string {
+  const m = Math.floor(totalSegundos / 60);
+  const s = totalSegundos % 60;
+  if (m > 0) return `${m} min ${s.toString().padStart(2, "0")} s`;
+  return `${s} s`;
+}
 
 export function LoginForm({
   initialError,
@@ -23,19 +25,37 @@ export function LoginForm({
 }) {
   const router = useRouter();
   const [erro, setErro] = useState<string | null>(initialError);
+  const [cooldown, setCooldown] = useState<number | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
-  async function onSubmit(values: FormValues) {
+  // Contagem regressiva ao vivo enquanto o login estiver bloqueado (rate limit).
+  useEffect(() => {
+    if (cooldown === null) return;
+    if (cooldown <= 0) {
+      setCooldown(null);
+      setErro(null);
+      return;
+    }
+    const t = setTimeout(
+      () => setCooldown((c) => (c === null ? null : c - 1)),
+      1000,
+    );
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  async function onSubmit(values: LoginInput) {
     setErro(null);
     try {
-      const supabase = getBrowserSupabase();
-      const { error } = await supabase.auth.signInWithPassword(values);
-      if (error) {
-        setErro("E-mail ou senha inválidos.");
+      const res = await loginAction(values);
+      if (!res.ok) {
+        setErro(res.error);
+        if (res.retryAfterSeconds && res.retryAfterSeconds > 0) {
+          setCooldown(res.retryAfterSeconds);
+        }
         return;
       }
       router.push(nextPath);
@@ -44,6 +64,8 @@ export function LoginForm({
       setErro("Não foi possível conectar. Verifique a configuração do Supabase.");
     }
   }
+
+  const emCooldown = cooldown !== null && cooldown > 0;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-sm space-y-4">
@@ -84,10 +106,19 @@ export function LoginForm({
         )}
       </div>
 
-      {erro && <p className="text-sm text-red-500">{erro}</p>}
+      {erro && (
+        <p className="text-sm text-red-500">
+          {erro}
+          {emCooldown ? ` Tente de novo em ${formatTempo(cooldown!)}.` : ""}
+        </p>
+      )}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Entrando..." : "Entrar"}
+      <Button type="submit" className="w-full" disabled={isSubmitting || emCooldown}>
+        {isSubmitting
+          ? "Entrando..."
+          : emCooldown
+            ? `Aguarde ${formatTempo(cooldown!)}`
+            : "Entrar"}
       </Button>
     </form>
   );

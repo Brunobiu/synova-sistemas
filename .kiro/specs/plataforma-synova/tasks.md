@@ -29,13 +29,14 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
   - [x] 2.7 Testes de isolamento multi-tenant (tentativas cross-tenant devem falhar)
     - _Requisitos: 8, 24_
 
-- [ ] 3. Autenticação e autorização do admin
+- [x] 3. Autenticação e autorização do admin
   - [x] 3.1 Supabase Auth (e-mail/senha): tela de login, logout e sessão
     - _Requisitos: 18_
   - [x] 3.2 `middleware.ts` protegendo `/erp`, `/suporte` e `/api/admin`, com verificação de `role=admin` no servidor
     - _Requisitos: 18_
-  - [ ] 3.3 Convite de admins adicionais; rate limit de login; auditoria de acesso
+  - [x] 3.3 Convite de admins adicionais; rate limit de login; auditoria de acesso
     - _Requisitos: 18, 20, 23_
+    - _Nota: login movido para Server Action (`app/(auth)/login/actions.ts`) para permitir rate limit por IP+e-mail (`lib/auth/login-guard.ts`, limiter dedicado em memória) e auditoria das tentativas (`admin.login.success/failed/rate_limited` e `admin.access_denied` para não-admin). `logAudit` agora grava o IP. Convite de admins (Opção A) em `/erp/admins`: cria o usuário no Auth com e-mail confirmado (service role, exigido pela Admin API) + `role=admin` e audita `admin.invited`. Convite por e-mail (SMTP/Resend) fica como evolução. Rate limit em memória por instância (store compartilhado + captcha ficam para endurecimento futuro, ver Bloco 15)._
   - [x] 3.4 Testes (acesso negado sem admin; rotas/APIs protegidas)
     - _Requisitos: 18, 24_
 
