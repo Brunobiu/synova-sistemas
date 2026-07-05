@@ -127,16 +127,18 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 24_
     - _Nota: `apps/widget` (Vite → `embed.js` IIFE em Shadow DOM), servido pelo admin em `/widget/embed.js` + `demo.html`. Núcleo testável (config/api/fila, 10 testes). Notificação de resposta por polling (5s); Supabase Realtime fica como evolução. `embed.js` versionado no `public/` do admin (regerar: `pnpm --filter @synova/widget build`)._
 
-- [ ] 12. Painel de suporte + tempo real
-  - [ ] 12.1 Lista unificada de chats/tickets com críticos em vermelho no topo e filtros por sistema/empresa/usuário
+- [x] 12. Painel de suporte + tempo real
+  - [x] 12.1 Lista unificada de chats/tickets com críticos em vermelho no topo e filtros por sistema/empresa/usuário
     - _Requisitos: 14, 15_
-  - [ ] 12.2 Visão de conversa (histórico + anexos), responder manual, assumir da IA (pausa auto-resposta), encerrar e reclassificar prioridade (auditado)
+  - [x] 12.2 Visão de conversa (histórico + anexos), responder manual, assumir da IA (pausa auto-resposta), encerrar e reclassificar prioridade (auditado)
     - _Requisitos: 10, 12, 14, 15, 20_
-  - [ ] 12.3 Assinaturas Supabase Realtime (`chats`/`messages`/`tickets`/`notifications`)
+  - [x] 12.3 Assinaturas Supabase Realtime (`chats`/`messages`/`tickets`/`notifications`)
     - _Requisitos: 15_
-  - [ ] 12.4 Arquivar/ocultar sem apagar (retenção) e busca no histórico completo
+    - _Nota: "quase tempo real" via polling (revalida a cada 5–8s). O Supabase Realtime nativo fica como evolução (precisa habilitar replicação + RLS no Realtime)._
+  - [x] 12.4 Arquivar/ocultar sem apagar (retenção) e busca no histórico completo
     - _Requisitos: 16_
-  - [ ] 12.5 Testes de entrada/saída e de fluxo do painel
+    - _Nota: arquivar conversa (status `archived`), resolver/fechar ticket (some da fila sem apagar) e busca por assunto do ticket. Nada é deletado._
+  - [x] 12.5 Testes de entrada/saída e de fluxo do painel
     - _Requisitos: 24_
 
 - [ ] 13. Central de notificações (somente painel)

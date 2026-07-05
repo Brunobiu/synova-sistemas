@@ -80,6 +80,18 @@ Passos:
 
 Observação: o `embed.js` é gerado do app `apps/widget`. Para regenerar após mudanças: `pnpm --filter @synova/widget build`.
 
+## Bloco 12 — Painel de suporte (`/suporte`)
+Aqui você vê e responde o que o widget cria. Link "Suporte" no topo do ERP.
+- [ ] Depois de conversar pelo widget, abrir `/suporte`: a conversa/ticket aparece
+- [ ] Tickets críticos aparecem em vermelho no topo; filtrar por sistema/status; buscar por assunto
+- [ ] Abrir uma conversa: ver histórico (cliente/IA), anexos com link, e o ticket vinculado
+- [ ] "Assumir da IA" pausa a auto-resposta; responder como atendente aparece no chat
+- [ ] "Devolver para a IA" reativa; "Encerrar" e "Arquivar" (a conversa some da lista, sem apagar)
+- [ ] Reclassificar a prioridade do ticket e "Resolver" (fica auditado)
+- [ ] A lista/conversa atualiza sozinha a cada poucos segundos (near-real-time por polling)
+
+Dica: para o ciclo completo, deixe o widget aberto numa aba e o `/suporte` em outra.
+
 ## Como rodar a bateria automatizada
 Na pasta `plataforma`:
 - `pnpm test` — roda todos os testes (deve dar tudo verde)

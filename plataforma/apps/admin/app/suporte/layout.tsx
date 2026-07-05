@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
 
@@ -11,7 +12,19 @@ export default async function SuporteLayout({
   return (
     <div className="min-h-screen">
       <header className="flex items-center justify-between border-b px-6 py-4">
-        <span className="font-semibold">Synova · Suporte</span>
+        <div className="flex items-center gap-6">
+          <Link href="/suporte" className="font-semibold">
+            Synova · Suporte
+          </Link>
+          <nav className="flex items-center gap-4 text-sm text-gray-500">
+            <Link href="/suporte" className="hover:text-gray-900">
+              Caixa
+            </Link>
+            <Link href="/erp" className="hover:text-gray-900">
+              ERP
+            </Link>
+          </nav>
+        </div>
         <LogoutButton />
       </header>
       <main className="p-6">{children}</main>
