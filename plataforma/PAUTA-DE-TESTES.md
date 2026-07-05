@@ -57,6 +57,29 @@ quando o widget e as APIs entrarem (Blocos 9 e 11). O que os testes garantem:
 
 ---
 
+## Blocos 8 a 10 — Motor de IA, API do widget e anexos (backend)
+Cobertos por testes automatizados (`pnpm test`). Ficam totalmente testáveis na mão pelo widget (abaixo):
+- [ ] Motor de IA: resposta estruturada, contexto com precedência empresa>sistema, escalonamento
+- [ ] API do widget: sessão (handshake), mensagem (RAG + resposta/escala), ticket, histórico
+- [ ] Anexos: tipos permitidos, bloqueio de perigosos, limite de tamanho, URL assinada
+
+## Bloco 11 — Widget embutível (dá pra testar o chat de ponta a ponta)
+Pré-requisitos:
+- [ ] Ter um sistema criado no ERP com a chave pública (`pk_...`) à mão
+- [ ] Adicionar `http://localhost:3000` aos **domínios permitidos** do sistema (aba Integração)
+- [ ] (Opcional, para IA responder) Configurar e ativar uma chave de IA em `/erp/ia`
+
+Passos:
+- [ ] Com o `pnpm dev` rodando, abrir `http://localhost:3000/widget/demo.html`
+- [ ] Editar o `data-synova-key` do demo com a sua chave `pk_...` (o arquivo fica em `apps/admin/public/widget/demo.html`)
+- [ ] Clicar no botão flutuante (canto inferior direito) e enviar uma mensagem
+- [ ] Com IA ativa: recebe resposta automática; pergunta "crítica" (ex.: "o sistema caiu") deve escalar e abrir chamado
+- [ ] Sem IA ativa: encaminha para humano e abre chamado (degradação graciosa)
+- [ ] Testar "Abrir chamado" e o envio de um anexo (imagem/PDF)
+- [ ] As conversas/tickets ficam no banco (aparecerão no painel de suporte — Bloco 12)
+
+Observação: o `embed.js` é gerado do app `apps/widget`. Para regenerar após mudanças: `pnpm --filter @synova/widget build`.
+
 ## Como rodar a bateria automatizada
 Na pasta `plataforma`:
 - `pnpm test` — roda todos os testes (deve dar tudo verde)

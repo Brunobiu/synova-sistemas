@@ -116,15 +116,16 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 8, 19, 24_
     - _Nota: bucket privado `widget-attachments` criado sob demanda no 1º upload; caminho `<system>/<tenant>/<uuid>-<arquivo>`; acesso só por URL assinada (5min). Compressão de imagem ficou como opcional (não implementada). Anexos vinculam-se à mensagem via `attachmentIds`._
 
-- [ ] 11. Widget embutível (`apps/widget`)
-  - [ ] 11.1 `embed.js` + `init`; UI flutuante em Shadow DOM; responsiva e com estilo isolado
+- [x] 11. Widget embutível (`apps/widget`)
+  - [x] 11.1 `embed.js` + `init`; UI flutuante em Shadow DOM; responsiva e com estilo isolado
     - _Requisitos: 9_
-  - [ ] 11.2 Chat, abrir ticket, upload, histórico recente e indicador de status
+  - [x] 11.2 Chat, abrir ticket, upload, histórico recente e indicador de status
     - _Requisitos: 4, 9, 12, 19_
-  - [ ] 11.3 Notificação de resposta (Realtime/polling) + fila offline de mensagens
+  - [x] 11.3 Notificação de resposta (Realtime/polling) + fila offline de mensagens
     - _Requisitos: 9_
-  - [ ] 11.4 Testes (contrato com a API e estados do widget)
+  - [x] 11.4 Testes (contrato com a API e estados do widget)
     - _Requisitos: 24_
+    - _Nota: `apps/widget` (Vite → `embed.js` IIFE em Shadow DOM), servido pelo admin em `/widget/embed.js` + `demo.html`. Núcleo testável (config/api/fila, 10 testes). Notificação de resposta por polling (5s); Supabase Realtime fica como evolução. `embed.js` versionado no `public/` do admin (regerar: `pnpm --filter @synova/widget build`)._
 
 - [ ] 12. Painel de suporte + tempo real
   - [ ] 12.1 Lista unificada de chats/tickets com críticos em vermelho no topo e filtros por sistema/empresa/usuário

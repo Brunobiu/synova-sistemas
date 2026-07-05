@@ -109,6 +109,15 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  apps/widget:
+    devDependencies:
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vite:
+        specifier: ^5.4.0
+        version: 5.4.21(@types/node@20.19.43)(lightningcss@1.32.0)
+
   packages/ai:
     dependencies:
       '@synova/shared':
