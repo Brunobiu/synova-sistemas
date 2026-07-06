@@ -3,11 +3,19 @@ import type { WidgetConfig } from "./config";
 // Cliente da API pública do widget. Cuida do envelope { ok, data | code,message },
 // injeta a chave e o token (Bearer) e expõe os endpoints do Bloco 9.
 
+export interface AttachmentItem {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  url: string;
+}
+
 export interface MessageItem {
   id: string;
   senderType: "user" | "ai" | "admin" | "system";
   content: string;
   createdAt: string;
+  attachments?: AttachmentItem[];
 }
 
 export interface SessionResult {

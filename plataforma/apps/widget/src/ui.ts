@@ -1,4 +1,4 @@
-import type { MessageItem, TicketItem } from "./api";
+import type { AttachmentItem, MessageItem, TicketItem } from "./api";
 import type { WidgetConfig } from "./config";
 
 // UI flutuante isolada em Shadow DOM (estilos não vazam nem sofrem do site host).
@@ -170,12 +170,39 @@ export class WidgetUI {
   addMessage(item: MessageItem): boolean {
     if (this.seen.has(item.id)) return false;
     this.seen.add(item.id);
-    const el = document.createElement("div");
-    el.className = SENDER_CLASS[item.senderType] ?? "msg system";
-    el.textContent = item.content;
-    this.list.appendChild(el);
+    this.list.appendChild(this.buildMessageEl(item));
     this.scrollDown(this.list);
     return true;
+  }
+
+  /** Monta a bolha da mensagem: texto + anexos (imagem inline / link de arquivo). */
+  private buildMessageEl(item: MessageItem): HTMLDivElement {
+    const el = document.createElement("div");
+    el.className = SENDER_CLASS[item.senderType] ?? "msg system";
+    if (item.content) el.appendChild(document.createTextNode(item.content));
+    for (const att of item.attachments ?? []) this.appendAttachment(el, att);
+    return el;
+  }
+
+  private appendAttachment(parent: HTMLElement, att: AttachmentItem): void {
+    if (!att.url) return;
+    if (att.mimeType.startsWith("image/")) {
+      const img = document.createElement("img");
+      img.className = "msg-img";
+      img.src = att.url;
+      img.alt = att.fileName;
+      img.loading = "lazy";
+      img.addEventListener("click", () => window.open(att.url, "_blank", "noopener"));
+      parent.appendChild(img);
+    } else {
+      const link = document.createElement("a");
+      link.className = "msg-file";
+      link.href = att.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = `\uD83D\uDCCE ${att.fileName}`;
+      parent.appendChild(link);
+    }
   }
 
   addLocal(content: string, kind: "user" | "system"): void {
@@ -316,10 +343,7 @@ export class WidgetUI {
   addThreadMessage(item: MessageItem): boolean {
     if (this.threadSeen.has(item.id)) return false;
     this.threadSeen.add(item.id);
-    const el = document.createElement("div");
-    el.className = SENDER_CLASS[item.senderType] ?? "msg system";
-    el.textContent = item.content;
-    this.threadMessages.appendChild(el);
+    this.threadMessages.appendChild(this.buildMessageEl(item));
     this.scrollDown(this.threadMessages);
     return true;
   }
@@ -362,6 +386,8 @@ export class WidgetUI {
         .msg.user { align-self: flex-end; background: ${c}; color: #fff; border-bottom-right-radius: 2px; }
         .msg.ai, .msg.admin { align-self: flex-start; background: #fff; color: #111827; border: 1px solid #e5e7eb; border-bottom-left-radius: 2px; }
         .msg.system { align-self: center; background: #fef3c7; color: #92400e; font-size: 12px; }
+        .msg-img { display: block; max-width: 100%; margin-top: 6px; border-radius: 8px; cursor: pointer; }
+        .msg-file { display: inline-block; margin-top: 6px; font-size: 13px; text-decoration: underline; word-break: break-all; }
         .action-ticket, .action-newchat {
           align-self: center; margin: 2px 0; border: none; border-radius: 8px; cursor: pointer;
           padding: 8px 14px; font-size: 13px; font-weight: 600;

@@ -1,6 +1,7 @@
 import type { Priority } from "@synova/shared";
 import type { HistoryItem, TicketSummary } from "@synova/ai";
 import { getServiceSupabase } from "@/lib/supabase/service";
+import { signedUrl } from "./storage";
 
 // Acesso a dados da borda do widget (service client). O escopo (system/tenant) é
 // SEMPRE aplicado explicitamente aqui, já que o widget é anônimo.
@@ -192,11 +193,20 @@ export async function createChat(params: {
   return data as ChatRow;
 }
 
+export interface StoredAttachment {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  /** URL assinada temporária (5 min); vazia se falhar ao gerar. */
+  url: string;
+}
+
 export interface StoredMessage {
   id: string;
   senderType: "user" | "ai" | "admin" | "system";
   content: string;
   createdAt: string;
+  attachments?: StoredAttachment[];
 }
 
 export async function insertMessage(params: {
@@ -227,6 +237,44 @@ export async function insertMessage(params: {
   return { id: r.id, senderType: r.sender_type, content: r.content, createdAt: r.created_at };
 }
 
+/** Anexos das mensagens dadas, com URLs assinadas (5 min). O escopo já vem garantido pelo chat. */
+async function attachmentsByMessage(
+  db: DB,
+  messageIds: string[],
+): Promise<Map<string, StoredAttachment[]>> {
+  const map = new Map<string, StoredAttachment[]>();
+  if (messageIds.length === 0) return map;
+  const { data } = await db
+    .from("attachments")
+    .select("id, message_id, file_name, mime_type, storage_path")
+    .in("message_id", messageIds);
+  const rows = (data ?? []) as Array<{
+    id: string;
+    message_id: string;
+    file_name: string;
+    mime_type: string;
+    storage_path: string;
+  }>;
+  const withUrls = await Promise.all(
+    rows.map(async (a) => {
+      let url = "";
+      try {
+        url = await signedUrl(a.storage_path, 300);
+      } catch {
+        url = "";
+      }
+      return { ...a, url };
+    }),
+  );
+  for (const a of withUrls) {
+    if (!a.url) continue;
+    const list = map.get(a.message_id) ?? [];
+    list.push({ id: a.id, fileName: a.file_name, mimeType: a.mime_type, url: a.url });
+    map.set(a.message_id, list);
+  }
+  return map;
+}
+
 export async function listMessages(chatId: string, limit: number): Promise<StoredMessage[]> {
   const db: DB = getServiceSupabase();
   const { data } = await db
@@ -235,9 +283,20 @@ export async function listMessages(chatId: string, limit: number): Promise<Store
     .eq("chat_id", chatId)
     .order("created_at", { ascending: true })
     .limit(limit);
-  return ((data ?? []) as Array<{ id: string; sender_type: StoredMessage["senderType"]; content: string; created_at: string }>).map(
-    (r) => ({ id: r.id, senderType: r.sender_type, content: r.content, createdAt: r.created_at }),
-  );
+  const rows = (data ?? []) as Array<{
+    id: string;
+    sender_type: StoredMessage["senderType"];
+    content: string;
+    created_at: string;
+  }>;
+  const attMap = await attachmentsByMessage(db, rows.map((r) => r.id));
+  return rows.map((r) => ({
+    id: r.id,
+    senderType: r.sender_type,
+    content: r.content,
+    createdAt: r.created_at,
+    attachments: attMap.get(r.id),
+  }));
 }
 
 const SENDER_TO_ROLE: Record<string, HistoryItem["role"]> = {
