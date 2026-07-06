@@ -143,3 +143,138 @@
         reveals.forEach(function (el) { el.classList.add("is-visible"); });
     }
 })();
+
+
+/* ============================================================
+   Filtro da página "Nossos Sistemas" (apenas visual)
+   Compara data-filter do botão com data-cat de cada card.
+   Só roda nas páginas que tiverem .sys-filter.
+   ============================================================ */
+(function () {
+    "use strict";
+
+    var filterBtns = document.querySelectorAll(".sys-filter");
+    if (!filterBtns.length) return;
+
+    var items = document.querySelectorAll(".sys-item");
+
+    filterBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var filtro = btn.getAttribute("data-filter");
+
+            filterBtns.forEach(function (b) { b.classList.remove("active"); });
+            btn.classList.add("active");
+
+            items.forEach(function (item) {
+                var cat = item.getAttribute("data-cat");
+                var mostrar = (filtro === "todos" || cat === filtro);
+                item.style.display = mostrar ? "" : "none";
+            });
+        });
+    });
+})();
+
+
+/* ============================================================
+   Modal "Entre em Contato" nas páginas internas.
+   Qualquer botão .js-open-orcamento abre o modal (em vez de ir
+   direto ao WhatsApp). O modal é injetado só quando há um gatilho
+   na página; o CSS já vem de /tooplate-parallax-depth.css.
+   ============================================================ */
+(function () {
+    "use strict";
+
+    var WHATSAPP_NUMBER = "5562994757240";
+    var triggers = document.querySelectorAll(".js-open-orcamento");
+    if (!triggers.length) return;
+
+    var modal = document.getElementById("orcamento-modal");
+    if (!modal) {
+        var holder = document.createElement("div");
+        holder.innerHTML =
+            '<div class="orcamento-modal" id="orcamento-modal">' +
+            '<div class="orcamento-modal-overlay"></div>' +
+            '<div class="orcamento-modal-box">' +
+            '<button class="orcamento-close" id="close-orcamento-modal" type="button">&times;</button>' +
+            '<h2 class="orcamento-title">Entre em Contato</h2>' +
+            '<p style="text-align:center; margin:-14px 0 22px; opacity:0.9;">Vamos conversar sobre o seu projeto!</p>' +
+            '<form id="orcamento-form">' +
+            '<div class="orcamento-row">' +
+            '<select id="tipo-negocio" name="tipo-negocio" class="orcamento-input" required>' +
+            '<option value="" disabled selected>Você já tem ideia do seu negócio?</option>' +
+            '<option>Já tenho ideia sobre o meu negócio</option>' +
+            '<option>Não tenho ideia sobre o meu negócio</option>' +
+            '</select>' +
+            '</div>' +
+            '<div class="orcamento-row">' +
+            '<input type="text" id="nome" name="nome" class="orcamento-input" placeholder="Nome" required />' +
+            '<input type="email" id="email" name="email" class="orcamento-input" placeholder="Email" required />' +
+            '</div>' +
+            '<div class="orcamento-row">' +
+            '<select id="servico" name="servico" class="orcamento-input" required>' +
+            '<option value="" disabled selected>Qual serviço você precisa?</option>' +
+            '<option>Desenvolvimento Web</option>' +
+            '<option>App Mobile (iOS/Android)</option>' +
+            '<option>Sistema Sob Medida</option>' +
+            '<option>E-commerce / Loja Virtual</option>' +
+            '<option>Integração / API</option>' +
+            '<option>Mais de um Serviço</option>' +
+            '<option>Ainda não sei</option>' +
+            '</select>' +
+            '</div>' +
+            '<button type="submit" class="orcamento-submit">CHAMAR NO WHATSAPP</button>' +
+            '</form>' +
+            '</div>' +
+            '</div>';
+        document.body.appendChild(holder.firstChild);
+        modal = document.getElementById("orcamento-modal");
+    }
+
+    var overlay = modal.querySelector(".orcamento-modal-overlay");
+    var closeBtn = document.getElementById("close-orcamento-modal");
+    var form = document.getElementById("orcamento-form");
+
+    function openModal(e) {
+        if (e) e.preventDefault();
+        modal.classList.add("show");
+    }
+
+    function closeModal() {
+        modal.classList.remove("show");
+    }
+
+    triggers.forEach(function (btn) {
+        btn.addEventListener("click", openModal);
+    });
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (overlay) overlay.addEventListener("click", closeModal);
+
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            var tipoNegocio = document.getElementById("tipo-negocio").value;
+            var nome = document.getElementById("nome").value.trim();
+            var email = document.getElementById("email").value.trim();
+            var servico = document.getElementById("servico").value;
+
+            if (!tipoNegocio || !nome || !email || !servico) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            var mensagem =
+                "Olá, meu nome é " + nome + ".\n" +
+                "Email: " + email + "\n" +
+                "Sobre o negócio: " + tipoNegocio + "\n" +
+                "Serviço desejado: " + servico + "\n\n" +
+                "Gostaria de conversar sobre um projeto.";
+
+            var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(mensagem);
+            window.open(url, "_blank");
+
+            closeModal();
+            form.reset();
+        });
+    }
+})();

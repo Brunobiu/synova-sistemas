@@ -134,6 +134,11 @@
     gap: 26px;
 }
 
+/* Variante mais larga (usada na página Nossos Sistemas) */
+.svc-main--wide {
+    max-width: 1150px;
+}
+
 .svc-block {
     padding: 38px 40px;
     border-radius: 24px;
@@ -541,18 +546,60 @@
    Lista de sistemas (portfólio) — foto à esquerda, texto à direita
    Estrutura pronta para depois ser gerada pelo banco de dados.
    =========================================================== */
-.sys-list {
+/* Filtros da página Nossos Sistemas */
+.sys-filters {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin: 0 auto 36px;
+}
+
+.sys-filter {
+    font-family: var(--font-heading);
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+}
+
+.sys-filter:hover {
+    color: #fff;
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+.sys-filter.active {
+    background: linear-gradient(135deg, #ffffff, #8a8a8a);
+    color: #0a0a0a;
+    border-color: transparent;
+}
+
+/* 2 sistemas por linha no desktop, 1 no mobile */
+.sys-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 28px;
+}
+
+@media (max-width: 900px) {
+    .sys-list {
+        grid-template-columns: 1fr;
+    }
 }
 
 .sys-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-    gap: 30px;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: 26px;
     align-items: center;
-    padding: 22px;
+    padding: 26px;
     border-radius: 22px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -572,12 +619,14 @@
     overflow: hidden;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    aspect-ratio: 4 / 3;
 }
 
 .sys-media img,
 .sys-media video {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 

@@ -94,7 +94,84 @@ Free HTML CSS Template
             background: rgba(255, 255, 255, 0.12);
             border-color: #fff;
         }
+
+        /* ===== Animações de entrada ao rolar ===== */
+        .rv {
+            opacity: 0;
+        }
+
+        .rv-up {
+            transform: translateY(45px);
+        }
+
+        .rv-left {
+            transform: translateX(-50px);
+        }
+
+        .rv.rv-go {
+            animation-duration: 1.7s;
+            animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+            animation-fill-mode: forwards;
+        }
+
+        .rv-up.rv-go {
+            animation-name: rvUp;
+        }
+
+        .rv-left.rv-go {
+            animation-name: rvLeft;
+        }
+
+        @keyframes rvUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes rvLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Stagger dos containers do Sobre Nós (esquerda -> direita) */
+        .about-boxes .rv:nth-child(2).rv-go {
+            animation-delay: 0.25s;
+        }
+
+        .about-boxes .rv:nth-child(3).rv-go {
+            animation-delay: 0.5s;
+        }
+
+        .about-boxes .rv:nth-child(4).rv-go {
+            animation-delay: 0.75s;
+        }
+
+        /* Girada de entrada do carrossel de serviços */
+        @keyframes carouselIntroSpin {
+            0% {
+                transform: rotateY(-380deg);
+            }
+
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
+
+        .carousel-3d.intro-spin {
+            animation: carouselIntroSpin 2.6s cubic-bezier(0.2, 0.8, 0.25, 1);
+        }
     </style>
+    <noscript>
+        <style>
+            .rv {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        </style>
+    </noscript>
 </head>
 
 <body>
@@ -202,10 +279,10 @@ Free HTML CSS Template
     <!-- About Section -->
     <section class="content-section section-gradient" id="about">
         <div class="container">
-            <h2 class="section-title">Sobre Nós</h2>
+            <h2 class="section-title rv rv-up">Sobre Nós</h2>
 
             <div class="about-content">
-                <div class="about-text">
+                <div class="about-text rv rv-up">
                     <h3>Tecnologia que faz a diferença</h3>
 
                     <p>A Synova Sistemas nasceu com a missão de transformar ideias em soluções digitais de alto
@@ -220,7 +297,7 @@ Free HTML CSS Template
 
                 <div class="about-boxes">
 
-                    <div class="info-box">
+                    <div class="info-box rv rv-left">
                         <div class="box-icon">
                             🚀
                             <span class="box-number">1</span>
@@ -230,7 +307,7 @@ Free HTML CSS Template
                             no ar com rapidez, sem abrir mão da qualidade.</p>
                     </div>
 
-                    <div class="info-box">
+                    <div class="info-box rv rv-left">
                         <div class="box-icon">
                             🔒
                             <span class="box-number">2</span>
@@ -240,7 +317,7 @@ Free HTML CSS Template
                             as etapas do desenvolvimento.</p>
                     </div>
 
-                    <div class="info-box">
+                    <div class="info-box rv rv-left">
                         <div class="box-icon">
                             📈
                             <span class="box-number">3</span>
@@ -250,7 +327,7 @@ Free HTML CSS Template
                             perder desempenho.</p>
                     </div>
 
-                    <div class="info-box">
+                    <div class="info-box rv rv-left">
                         <div class="box-icon">
                             🛠️
                             <span class="box-number">4</span>
@@ -505,7 +582,7 @@ Free HTML CSS Template
             <span class="apolo-badge">NOSSAS SOLUÇÕES</span>
         </div>
 
-        <div class="solucoes-head">
+        <div class="solucoes-head rv rv-up">
             <h2 class="solucoes-title">Escolha o próximo passo do seu negócio</h2>
             <p class="solucoes-lead">
                 Todo dia alguém procura na internet exatamente o que você faz. A pergunta é simples:
@@ -515,7 +592,7 @@ Free HTML CSS Template
             </p>
         </div>
 
-        <div class="solucoes-grid">
+        <div class="solucoes-grid rv rv-up">
             <a class="solucao-card" href="servicos/landing-page.html">
                 <div class="solucao-icon">🌐</div>
                 <span class="solucao-tag">Presença Profissional</span>
@@ -553,7 +630,7 @@ Free HTML CSS Template
             </a>
         </div>
 
-        <a class="solucoes-banner" href="servicos/sistemas-sob-medida.html">
+        <a class="solucoes-banner rv rv-up" href="servicos/sistemas-sob-medida.html">
             <div class="solucao-icon">🧩</div>
             <div class="banner-text">
                 <h3 class="solucao-nome">Precisa de algo específico?</h3>
@@ -576,7 +653,7 @@ Free HTML CSS Template
         </div>
 
         <div class="container">
-            <h2 class="section-title">Nossos Serviços</h2>
+            <h2 class="section-title rv rv-up">Nossos Serviços</h2>
             <div class="features-container">
                 <div class="carousel-3d" id="carousel">
                     <div class="feature-card-3d" data-index="0">
@@ -635,7 +712,7 @@ Free HTML CSS Template
     <!-- Gallery Section -->
     <section class="gallery-section section-gradient" id="gallery">
         <div class="container">
-            <h2 class="section-title">Depoimentos</h2>
+            <h2 class="section-title rv rv-up">Depoimentos</h2>
             <div class="gallery-grid">
 
                 <!-- Substitua images/1.png ... 4.png pelos prints das conversas (depoimentos) -->
@@ -830,6 +907,58 @@ Free HTML CSS Template
             acceptTermos.addEventListener("click", closeTermosModal);
             termosOverlay.addEventListener("click", closeTermosModal);
         });
+    </script>
+    <!-- Animações de entrada ao rolar + girada do carrossel -->
+    <script>
+        (function () {
+            var els = document.querySelectorAll('.rv');
+
+            if (!('IntersectionObserver' in window)) {
+                // Navegador antigo: mostra tudo sem animação
+                els.forEach(function (el) { el.classList.remove('rv', 'rv-up', 'rv-left'); });
+            } else {
+                var reveal = function (el) {
+                    el.classList.add('rv-go');
+                    var clear = function () {
+                        el.classList.remove('rv', 'rv-up', 'rv-left', 'rv-go');
+                    };
+                    el.addEventListener('animationend', clear, { once: true });
+                    // Segurança: garante que o elemento nunca fique escondido
+                    setTimeout(clear, 3200);
+                };
+
+                var io = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            io.unobserve(entry.target);
+                            reveal(entry.target);
+                        }
+                    });
+                }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+
+                els.forEach(function (el) { io.observe(el); });
+            }
+
+            // Carrossel de serviços: dá uma girada rápida e para no card 1 ao aparecer
+            var features = document.getElementById('features');
+            var carousel = document.getElementById('carousel');
+            if (features && carousel && ('IntersectionObserver' in window)) {
+                var spun = false;
+                var spinIO = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting && !spun) {
+                            spun = true;
+                            spinIO.disconnect();
+                            carousel.classList.add('intro-spin');
+                            carousel.addEventListener('animationend', function () {
+                                carousel.classList.remove('intro-spin');
+                            }, { once: true });
+                        }
+                    });
+                }, { threshold: 0.25 });
+                spinIO.observe(features);
+            }
+        })();
     </script>
 </body>
 
