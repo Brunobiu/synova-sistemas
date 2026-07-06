@@ -1,14 +1,17 @@
 # Synova Sistemas
 
-Plataforma da Synova Sistemas. O projeto é dividido em **três partes independentes**:
+Plataforma da Synova Sistemas: um **monorepo** com o site institucional, o ERP/CRM interno e o
+suporte inteligente (chat com IA), servidos por um único app Next.js na Vercel + Supabase na nuvem.
 
-1. **Site institucional (landing page)** — o site público que fica em `seudominio.com.br`.
-   Feito em HTML, CSS e JavaScript puros (template Tooplate 2144 customizado).
-   **Não usa** a stack abaixo e permanece na **raiz do repositório, intocado.**
-2. **ERP / CRM** — sistema de gestão interno (em construção).
-3. **Suporte / Chat** — atendimento ao cliente (em construção).
+## Partes do projeto
 
-As partes **2** e **3** ficam no monorepo dentro de `plataforma/` e usam a stack moderna descrita abaixo.
+1. **Site institucional (landing page)** — site público em HTML/CSS/JS (template Tooplate 2144
+   customizado). Fica em `plataforma/apps/admin/public/` e é servido pelo próprio app Next (a rota
+   `/` reescreve para `home.html`). É a área do front-end.
+2. **ERP / CRM** (`/erp`) — cockpit interno: cadastro de sistemas/clientes, contexto, base de
+   conhecimento, configuração de IA, integração do widget e gestão de admins.
+3. **Suporte / Chat** (`/meu-atendimento` + widget) — painel de conversas/tickets/notificações/
+   métricas + widget embutível com IA.
 
 ---
 
@@ -16,85 +19,82 @@ As partes **2** e **3** ficam no monorepo dentro de `plataforma/` e usam a stack
 
 ```
 .
-├── index.html, home.html            # Landing page (vanilla, NÃO tocar)
-├── tooplate-*.css / tooplate-*.js   # Estilos e scripts da landing
-├── fotos/  images/                  # Assets da landing
 ├── README.md
-└── plataforma/                      # Monorepo (pnpm + Turborepo)
+├── ABOUT THIS TEMPLATE.txt
+├── .github/                            # CI (testes + builds)
+├── .kiro/                              # specs, steering e hooks do Kiro
+└── plataforma/                         # Monorepo (pnpm + Turborepo)
     ├── apps/
-    │   ├── erp/                      # ERP/CRM (Next.js)
-    │   └── suporte/                 # Chat de suporte (Next.js)
+    │   ├── admin/                      # Next.js 16 (App Router)
+    │   │   ├── app/
+    │   │   │   ├── (auth)/login/       # login do admin
+    │   │   │   ├── erp/                # ERP/CRM
+    │   │   │   ├── meu-atendimento/    # painel de suporte
+    │   │   │   └── api/widget/         # APIs públicas do widget
+    │   │   ├── public/                 # landing estática (área do front-end)
+    │   │   └── proxy.ts                # guard de auth (/erp, /meu-atendimento, /api/admin)
+    │   └── widget/                     # widget embutível (Vite → embed.js, Shadow DOM)
     ├── packages/
-    │   ├── database/                # Cliente Supabase + tipos compartilhados
-    │   └── ui/                       # Componentes shadcn/ui compartilhados
-    └── supabase/                     # Migrations e config do Supabase
+    │   ├── ai/                         # provedores (OpenAI/Anthropic/Google) + RAG + classificação
+    │   ├── database/                   # cliente Supabase + tipos + acesso escopado
+    │   ├── shared/                     # schemas Zod, enums, HMAC/JWT, CORS, rate limit
+    │   └── ui/                         # componentes shadcn/ui compartilhados
+    └── supabase/                       # migrations + RLS
 ```
 
 ---
 
-## Stack (usada apenas dentro de `plataforma/`)
+## Stack
 
-### Frontend
-- **Next.js** — framework React (App Router)
-- **React** — biblioteca de UI
-- **TypeScript** — tipagem estática
-- **Tailwind CSS** — estilização utilitária
-- **shadcn/ui** — componentes de UI
-- **Framer Motion** — animações
+- **App:** Next.js 16 (App Router), React, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion.
+- **Estado / dados:** TanStack Query, Zustand, React Hook Form, Zod.
+- **Widget:** TypeScript + Vite (bundle IIFE em Shadow DOM), sem dependências pesadas.
+- **Backend:** Route Handlers e Server Actions do Next.
+- **Banco / infra:** Supabase (PostgreSQL + Auth + Storage + pgvector), na nuvem.
+- **IA:** provedor plugável (OpenAI / Anthropic / Google). Ativo hoje: **Google Gemini**
+  (`gemini-2.5-flash` no chat, `gemini-embedding-001` a 1536 dims nos embeddings).
+- **Deploy:** Vercel — o app Next serve a landing em `/`, o cockpit e as APIs do widget no mesmo domínio.
+- **Testes:** Vitest (unit / integração) + CI no GitHub Actions.
 
-### Estado / Dados
-- **TanStack Query** — data fetching e cache
-- **Zustand** — estado global leve
-- **React Hook Form** — formulários
-- **Zod** — validação de schemas
-
-### Backend / API
-- **Next.js API Routes** — padrão do projeto
-- **NestJS** — alternativa para serviços maiores/dedicados
-- **tRPC** — opcional (tipagem ponta a ponta)
-
-### Banco / Infra
-- **Supabase** — PostgreSQL + Auth + Storage
-- **Redis** — cache (opcional)
-
-### Deploy
-- **Vercel** — frontend + backend leve
-
-### Extras
-- **Resend** — envio de e-mails
-- **Stripe** — pagamentos
-- **Sentry** — monitoramento de erros
+### Planejado / opcional (ainda não integrado)
+Resend (convite de admin por e-mail), Sentry (`SENTRY_DSN` — já há hook de observabilidade
+drop-in), Redis/Upstash (rate limit compartilhado) e Stripe (cobrança, caso vire SaaS self-service).
 
 ---
 
 ## Pré-requisitos
-- Node.js >= 20 (ambiente atual: v22)
-- pnpm (habilitado via `corepack`)
-- Supabase CLI
-- Contas: GitHub, Supabase, Vercel
+- Node.js >= 20
+- pnpm (via `corepack`)
+- Conta Supabase (o schema já está aplicado na nuvem)
 
-## Como rodar (após o scaffold dos apps)
+## Como rodar
 ```bash
 cd plataforma
 pnpm install
-pnpm dev
+pnpm dev        # sobe o app admin
+pnpm test       # roda a suíte (Vitest)
 ```
 
 ## Variáveis de ambiente
-Use `plataforma/.env.example` como base e crie um `.env.local` em cada app.
+Crie `plataforma/apps/admin/.env.local` (base em `plataforma/.env.example`). Mínimo:
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+- `APP_ENCRYPTION_KEY` (criptografia das chaves de IA)
+- chave do provedor de IA (ex.: Google) quando for usar a IA
 
 ## Deploy
-- Cada app (`erp`, `suporte`) vira um projeto na Vercel apontando para o seu subdiretório dentro de `plataforma/`.
-- A landing page continua servida como site estático.
+- Projeto na Vercel com **Root Directory = `plataforma/apps/admin`** e framework **Next.js**;
+  deploy automático a cada push na `main`.
+- O widget é gerado por `pnpm --filter @synova/widget build` e versionado em
+  `apps/admin/public/widget/embed.js`.
 
 ---
 
 ## Status
-- [x] Auditoria de ambiente e conexões
-- [x] Estrutura base do monorepo
-- [x] README com a stack completa
-- [x] Supabase inicializado (config local + pacote @synova/database)
-- [ ] Scaffold do app ERP/CRM
-- [ ] Scaffold do app Suporte/Chat
-- [ ] Conexão Supabase (chaves)
-- [ ] Deploy Vercel
+- [x] Monorepo, banco + RLS, autenticação do admin
+- [x] ERP/CRM (sistemas, contexto, base de conhecimento, IA, integração)
+- [x] IA + RAG (motor de contexto, classificação, degradação graciosa)
+- [x] Widget embutível (chat, tickets em modal, thread, anexos, histórico)
+- [x] Painel de suporte (conversas, tickets, notificações, métricas)
+- [x] Papéis Dono/Atendente + auditoria
+- [x] Deploy na Vercel + Supabase na nuvem

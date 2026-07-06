@@ -3,7 +3,7 @@
 Execução incremental, guiada por testes. Cada tarefa entrega algo verificável e referencia os
 requisitos que atende. Desenvolvimento e testes usam **Supabase local** (`supabase start`);
 conectar o projeto real do Supabase e as chaves de IA é feito quando você fornecer as
-credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
+credenciais. A landing (`apps/admin/public`) é a área do front-end e **não é tocada** pelas tarefas de backend.
 
 - [x] 1. Fundação do monorepo e ferramentas de teste
   - [x] 1.1 Scaffold do `apps/admin` (Next.js App Router + TypeScript + Tailwind + shadcn/ui) e instalar Framer Motion, TanStack Query, Zustand, React Hook Form e Zod
@@ -32,7 +32,7 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
 - [x] 3. Autenticação e autorização do admin
   - [x] 3.1 Supabase Auth (e-mail/senha): tela de login, logout e sessão
     - _Requisitos: 18_
-  - [x] 3.2 `middleware.ts` protegendo `/erp`, `/suporte` e `/api/admin`, com verificação de `role=admin` no servidor
+  - [x] 3.2 `proxy.ts` (Next 16, antigo `middleware.ts`) protegendo `/erp`, `/meu-atendimento` e `/api/admin`, com verificação de papel no servidor
     - _Requisitos: 18_
   - [x] 3.3 Convite de admins adicionais; rate limit de login; auditoria de acesso
     - _Requisitos: 18, 20, 23_
@@ -149,7 +149,7 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 15, 16, 17_
   - [x] 13.3 Testes
     - _Requisitos: 24_
-    - _Nota: geração feita no fluxo do widget (novo chat/ticket/crítico/escalonamento) + upload de arquivo; central em `/suporte/notificacoes` agrupa por sistema, filtra por sistema/status/prioridade, marca lida/resolvida (sem apagar), críticos destacados, atualização por polling._
+    - _Nota: geração feita no fluxo do widget (novo chat/ticket/crítico/escalonamento) + upload de arquivo; central em `/meu-atendimento/notificacoes` agrupa por sistema, filtra por sistema/status/prioridade, marca lida/resolvida (sem apagar), críticos destacados, atualização por polling._
 
 - [x] 14. Auditoria e métricas
   - [x] 14.1 Registro de auditoria nas ações sensíveis (chave, acesso negado, escalonamento, transições de ticket, uploads, ações admin)
@@ -158,7 +158,7 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 21_
   - [x] 14.3 Testes das agregações e do escopo
     - _Requisitos: 21, 24_
-    - _Nota: auditoria cobre escalonamento, transições/reclassificação de ticket, ações do painel, rotação de chave e acesso negado. Dashboard em `/suporte/metricas` (tickets por sistema/prioridade/status, taxa de escalonamento e de resolução automática). Tempos médios IA/humano e satisfação (CSAT) ficam para evolução (exigem timestamps por mensagem e mecanismo de avaliação). Agregação testada; isolamento garantido por RLS (testes do Bloco 2)._
+    - _Nota: auditoria cobre escalonamento, transições/reclassificação de ticket, ações do painel, rotação de chave e acesso negado. Dashboard em `/meu-atendimento/metricas` (tickets por sistema/prioridade/status, taxa de escalonamento e de resolução automática). Tempos médios IA/humano e satisfação (CSAT) ficam para evolução (exigem timestamps por mensagem e mecanismo de avaliação). Agregação testada; isolamento garantido por RLS (testes do Bloco 2)._
 
 - [x] 15. Qualidade, resiliência e portões de pré-deploy
   - [x] 15.1 Suíte obrigatória de isolamento multi-tenant + segurança + contratos como portão de CI
@@ -199,5 +199,5 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
 
 ## Observações
 - Tarefas que dependem de credenciais externas (projeto Supabase real, chaves de IA na Vercel) são desenvolvidas/testadas localmente e conectadas quando você fornecer as chaves.
-- Deploy na Vercel e roteamento de domínio (`/`, `/suporte`, `/erp`) são finalizados após a implementação, sem alterar a landing.
+- Deploy na Vercel e roteamento de domínio (`/`, `/meu-atendimento`, `/erp`) são finalizados após a implementação, sem alterar a landing.
 - Nenhuma tarefa executa DELETE de dados de atendimento (retenção permanente).

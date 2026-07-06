@@ -13,15 +13,15 @@ Princípios que guiam o design:
 - **Provedor de IA plugável** (OpenAI, Anthropic, Google) atrás de uma interface única.
 - **Nada é apagado** (arquivar/ocultar, nunca deletar).
 - **Testabilidade** (camadas desacopladas, contratos de entrada/saída validáveis).
-- **Landing intocada** (o site atual na raiz não é modificado).
+- **Landing preservada** (o site em `apps/admin/public` é a área do front-end e não é alterado pelo backend).
 
 ### Mapeamento requisitos → design (resumo)
 - R1–R6 (ERP, hierarquia, contexto, usuários, IA, interligação) → ERP (cockpit) + `packages/ai` + modelo de dados.
-- R7, R8, R23 (chave, isolamento, segurança) → autenticação de widget (HMAC/JWT), RLS, middleware de segurança.
+- R7, R8, R23 (chave, isolamento, segurança) → autorização de widget (chave + token de sessão), RLS, guarda de borda.
 - R9, R10, R11 (widget, IA, contexto/RAG) → `apps/widget`, API pública, motor de contexto.
 - R12–R14 (tickets, escalonamento, prioridade) → serviço de atendimento + IA estruturada.
 - R15–R17 (painel, retenção, notificações) → painel de suporte + Realtime.
-- R18 (auth admin) → Supabase Auth + middleware.
+- R18 (auth admin) → Supabase Auth + proxy (Next 16).
 - R19–R22, R24, R25 (anexos, auditoria, métricas, dados, testes, deploy) → Storage, tabelas, dashboards, estratégia de testes, Vercel.
 
 ---
@@ -37,12 +37,12 @@ plataforma/
 │   │   ├── app/
 │   │   │   ├── (auth)/login/          # login admin
 │   │   │   ├── erp/                    # ERP: projetos, contexto, usuários, IA
-│   │   │   ├── suporte/                # Painel: chats, tickets, métricas, notificações
+│   │   │   ├── meu-atendimento/        # Painel: chats, tickets, métricas, notificações
 │   │   │   └── api/
 │   │   │       ├── admin/              # APIs internas (protegidas por sessão)
 │   │   │       ├── widget/             # APIs públicas do widget (chave + assinatura)
 │   │   │       └── ai/                 # processamento de IA (server-only)
-│   │   └── middleware.ts               # protege /erp e /suporte
+│   │   └── proxy.ts                    # protege /erp e /meu-atendimento
 │   └── widget/                # Widget embutível (bundle standalone, leve)
 │       └── src/                        # UI flutuante + cliente da API
 ├── packages/
@@ -53,9 +53,9 @@ plataforma/
 └── supabase/                  # migrations, policies (RLS), config
 ```
 
-Observação: isso substitui o plano anterior de `apps/erp` + `apps/suporte` separados. Como
+Observação: isso substitui o plano anterior de `apps/erp` + `apps/meu-atendimento` separados. Como
 ambos são áreas do mesmo cockpit protegido e compartilham sessão/UI, ficam em `apps/admin`
-(ERP em `/erp`, suporte em `/suporte`). O widget é a única superfície pública.
+(ERP em `/erp`, suporte em `/meu-atendimento`). O widget é a única superfície pública.
 
 ### Diagrama de arquitetura
 
@@ -69,7 +69,7 @@ flowchart TB
     subgraph Vercel["Vercel"]
         subgraph Admin["apps/admin (Next.js)"]
             ERP["ERP /erp"]
-            PAN["Painel /suporte"]
+            PAN["Painel /meu-atendimento"]
             APIW["/api/widget (pública, chave+assinatura)"]
             APIA["/api/admin (sessão)"]
             AISVC["/api/ai (server-only)"]
@@ -145,14 +145,16 @@ sequenceDiagram
 
 ### 1. Widget embutível (`apps/widget`)
 
-- Distribuído como um script (`embed.js`) que o SaaS host inclui e inicializa:
+- Distribuído como um script (`embed.js`, servido em `/widget/embed.js`) que o site host inclui;
+  auto-inicializa pela chave pública:
   ```html
-  <script src="https://SEU-DOMINIO/embed.js" defer
-          data-support-key="pk_sistemaX_..."></script>
-  <script>
-    SynovaSupport.init({ token: "<token assinado pelo backend do host>" });
-  </script>
+  <script src="https://SEU-DOMINIO/widget/embed.js"
+          data-synova-key="pk_..."
+          data-title="Suporte" data-color="#4f46e5" defer></script>
   ```
+  `data-synova-key` (chave pública do sistema) é obrigatória; `data-api-base` é opcional (cai para
+  a origem do script). A autorização usa a chave pública + allowlist de origens (`allowed_origins`)
+  e um token de sessão emitido por `POST /api/widget/session` (ver seção 2b).
 - **Isolamento de estilo:** a UI do widget é renderizada dentro de **Shadow DOM** (ou iframe) para não conflitar com o CSS do host (R9.5).
 - Bundle leve (alvo: pequeno) — implementação em React/Preact + Vite, sem trazer o peso do Next.
 - Funções: chat flutuante, abrir ticket, enviar texto/imagem/arquivo, histórico recente, status (online/offline), notificações de resposta (via Realtime ou polling).
@@ -162,15 +164,22 @@ sequenceDiagram
 
 Dois mecanismos distintos:
 
-**a) Admin (ERP + painel)** — Supabase Auth (e-mail + senha). Um `middleware.ts` protege
-`/erp`, `/suporte` e `/api/admin/*`. Autorização por papel (`role = admin`) verificada no
-servidor (R18). Convite de novos admins pelo dono.
+**a) Admin (ERP + painel)** — Supabase Auth (e-mail + senha). Um `proxy.ts` (convenção do Next 16,
+antigo `middleware.ts`) protege `/erp`, `/meu-atendimento` e `/api/admin/*`. Autorização por papel
+(`admin` = dono, `agent` = atendente) verificada no servidor (R18). Convite de novos admins pelo dono.
 
 **b) Widget (usuário final)** — sem login no Supabase. O **backend do SaaS host** gera um
 **token curto assinado (HMAC/JWT)** usando o segredo do sistema, contendo `system_id`,
 `tenant_id`, `user_id` e expiração. O widget envia `support_api_key` + esse token. Nossa API
 valida a assinatura com o segredo do sistema e deriva o escopo. Isso evita expor o segredo no
-browser e impede spoofing (R7). Fluxo:
+browser e impede spoofing (R7).
+
+> **Nota de implementação:** na versão atual o widget não depende de um token assinado pelo host.
+> A sessão é iniciada em `POST /api/widget/session`, que valida `support_api_key` + origem
+> (`allowed_origins`) + rate limit e **emite um token de sessão**; as demais chamadas usam esse
+> token. O modelo assinado pelo host (abaixo) fica disponível como evolução.
+
+Fluxo (desenho original):
 
 ```mermaid
 sequenceDiagram
@@ -225,11 +234,10 @@ type ChatResult = {
   IA não responde e o atendimento é escalado para humano, sinalizando no painel (R5.5, R24.4).
 
 **Nota importante sobre embeddings:** Anthropic não oferece embeddings de primeira parte. Os
-embeddings da base de conhecimento usam **um** modelo fixo por implantação (padrão: OpenAI
-`text-embedding-3-small`, 1536 dims; alternativa Google `text-embedding-004`, 768 dims). A
-dimensão da coluna `vector` é fixada conforme o modelo escolhido; trocar o modelo de embeddings
-exige reindexar. O **chat** pode usar qualquer um dos três provedores independentemente do
-modelo de embeddings.
+embeddings da base de conhecimento usam **um** modelo fixo por implantação; a coluna é
+`vector(1536)`. **Em produção hoje:** Google `gemini-embedding-001` com `outputDimensionality: 1536`
+(casa com a coluna). Trocar o modelo de embeddings exige reindexar. O **chat** pode usar qualquer
+um dos três provedores independentemente do modelo de embeddings.
 
 ### 5. Base de conhecimento e busca semântica
 
@@ -253,7 +261,7 @@ modelo de embeddings.
   - **Integração** (support_api_key, snippet do widget, allowlist de domínios, rotação de chave).
 - Formulários com React Hook Form + Zod; dados via TanStack Query; estado de UI com Zustand.
 
-### 7. Painel de Suporte (`/suporte`) + Realtime
+### 7. Painel de Suporte (`/meu-atendimento`) + Realtime
 
 - Lista unificada de chats e tickets, com **críticos em vermelho no topo** (R14.3, R15.5).
 - Filtros por Sistema/Empresa/Usuário; visão de conversa com histórico e anexos.
@@ -427,9 +435,9 @@ Ferramenta base: **Vitest** (unit/integration) + **Playwright** (E2E do painel, 
 - **App:** `apps/admin` implantado na Vercel (framework Next.js). Variáveis de ambiente do
   `.env.example` (Supabase, chaves de IA, segredos, Sentry).
 - **Widget:** `apps/widget` build gera `embed.js` versionado, servido por URL estável.
-- **Domínio/landing:** a landing estática atual permanece na raiz, intocada. O roteamento do
-  domínio (landing em `/`, app em `/suporte` e `/erp`) será feito via rewrites/roteamento na
-  Vercel, sem mover o código da landing. (Decisão de roteamento final a confirmar na fase de deploy.)
+- **Domínio/landing:** a landing estática fica em `apps/admin/public` e é servida pelo próprio app
+  Next — a rota `/` reescreve para `home.html` (`next.config.ts`). Assim, landing (`/`), cockpit
+  (`/erp`, `/meu-atendimento`) e APIs do widget (`/api/widget/*`) convivem no mesmo domínio da Vercel.
 - **Banco:** migrations versionadas em `supabase/migrations`; RLS aplicado por migration.
 - **Rollback (R24.8):** deploys imutáveis da Vercel permitem reverter; migrations escritas de
   forma aditiva/reversível.
