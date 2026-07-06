@@ -2063,8 +2063,8 @@ html {
 	/* Carousel Mobile */
 	.features-container {
 		height: 400px;
-		margin: 30px 0 80px;
-		perspective: 800px;
+		margin: 30px 0 120px;
+		perspective: 950px;
 	}
 
 	.feature-card-3d {
@@ -2076,27 +2076,27 @@ html {
 	}
 
 	.feature-card-3d:nth-child(1) {
-		transform: rotateY(0deg) translateZ(180px);
+		transform: rotateY(0deg) translateZ(215px);
 	}
 
 	.feature-card-3d:nth-child(2) {
-		transform: rotateY(60deg) translateZ(180px);
+		transform: rotateY(60deg) translateZ(215px);
 	}
 
 	.feature-card-3d:nth-child(3) {
-		transform: rotateY(120deg) translateZ(180px);
+		transform: rotateY(120deg) translateZ(215px);
 	}
 
 	.feature-card-3d:nth-child(4) {
-		transform: rotateY(180deg) translateZ(180px);
+		transform: rotateY(180deg) translateZ(215px);
 	}
 
 	.feature-card-3d:nth-child(5) {
-		transform: rotateY(240deg) translateZ(180px);
+		transform: rotateY(240deg) translateZ(215px);
 	}
 
 	.feature-card-3d:nth-child(6) {
-		transform: rotateY(300deg) translateZ(180px);
+		transform: rotateY(300deg) translateZ(215px);
 	}
 
 	.feature-icon-3d {
@@ -2122,7 +2122,7 @@ html {
 	}
 
 	.carousel-controls {
-		bottom: -40px;
+		bottom: -66px;
 	}
 
 	.carousel-btn {
@@ -2132,7 +2132,7 @@ html {
 	}
 
 	.carousel-indicators {
-		bottom: -75px;
+		bottom: -104px;
 	}
 
 	/* Gallery Mobile */
@@ -2286,7 +2286,7 @@ html {
 	/* Carousel Small Mobile */
 	.features-container {
 		height: 350px;
-		perspective: 600px;
+		perspective: 720px;
 	}
 
 	.feature-card-3d {
@@ -2298,27 +2298,27 @@ html {
 	}
 
 	.feature-card-3d:nth-child(1) {
-		transform: rotateY(0deg) translateZ(140px);
+		transform: rotateY(0deg) translateZ(165px);
 	}
 
 	.feature-card-3d:nth-child(2) {
-		transform: rotateY(60deg) translateZ(140px);
+		transform: rotateY(60deg) translateZ(165px);
 	}
 
 	.feature-card-3d:nth-child(3) {
-		transform: rotateY(120deg) translateZ(140px);
+		transform: rotateY(120deg) translateZ(165px);
 	}
 
 	.feature-card-3d:nth-child(4) {
-		transform: rotateY(180deg) translateZ(140px);
+		transform: rotateY(180deg) translateZ(165px);
 	}
 
 	.feature-card-3d:nth-child(5) {
-		transform: rotateY(240deg) translateZ(140px);
+		transform: rotateY(240deg) translateZ(165px);
 	}
 
 	.feature-card-3d:nth-child(6) {
-		transform: rotateY(300deg) translateZ(140px);
+		transform: rotateY(300deg) translateZ(165px);
 	}
 
 	.feature-icon-3d {
