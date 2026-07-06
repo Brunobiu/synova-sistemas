@@ -112,3 +112,17 @@ describe("computeResponseTimes", () => {
     expect(m.avgHumanResponseSeconds).toBeNull();
   });
 });
+
+describe("computeMetrics CSAT", () => {
+  it("calcula a média de CSAT com 1 casa decimal", () => {
+    const m = computeMetrics({ tickets: [], chats: [], systemNames: {}, csatRatings: [5, 4, 4] });
+    expect(m.csatAverage).toBe(4.3); // 13/3 = 4.33 -> 4.3
+    expect(m.csatCount).toBe(3);
+  });
+
+  it("csat null quando não há avaliações", () => {
+    const m = computeMetrics({ tickets: [], chats: [], systemNames: {} });
+    expect(m.csatAverage).toBeNull();
+    expect(m.csatCount).toBe(0);
+  });
+});

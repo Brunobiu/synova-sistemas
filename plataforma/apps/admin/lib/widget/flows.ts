@@ -320,12 +320,58 @@ export async function getTicketThread(scope: WidgetScope, ticketId: string) {
     scope.userId ?? null,
   );
   if (!ticket) return { ok: false as const, error: "Chamado não encontrado." };
-  const messages = ticket.chatId ? await data.listMessages(ticket.chatId, 200) : [];
+  const [messages, csat] = await Promise.all([
+    ticket.chatId ? data.listMessages(ticket.chatId, 200) : Promise.resolve([]),
+    data.getTicketCsat(ticket.id),
+  ]);
   return {
     ok: true as const,
-    ticket: { id: ticket.id, subject: ticket.subject, status: ticket.status, priority: ticket.priority },
+    ticket: {
+      id: ticket.id,
+      subject: ticket.subject,
+      status: ticket.status,
+      priority: ticket.priority,
+      csat,
+    },
     messages,
   };
+}
+
+/** Cliente avalia (CSAT 1..5) um chamado. Idempotente: se já avaliou, não duplica. */
+export async function rateTicket(
+  scope: WidgetScope,
+  ticketId: string,
+  rating: number,
+  comment: string | undefined,
+) {
+  const ticket = await data.getTicketScoped(
+    ticketId,
+    scope.systemId,
+    scope.tenantId,
+    scope.userId ?? null,
+  );
+  if (!ticket) return { ok: false as const, error: "Chamado não encontrado." };
+  const existing = await data.getTicketCsat(ticket.id);
+  if (existing != null) return { ok: true as const, csat: existing, alreadyRated: true };
+  await data.insertCsatEvent({
+    ticketId: ticket.id,
+    systemId: scope.systemId,
+    tenantId: scope.tenantId,
+    actorId: scope.externalRef ?? scope.userId ?? null,
+    rating,
+    comment,
+  });
+  await data.insertAudit({
+    systemId: scope.systemId,
+    tenantId: scope.tenantId,
+    actorType: scope.userId ? "user" : "anonymous",
+    actorId: scope.externalRef ?? scope.userId,
+    action: "widget.ticket.rated",
+    targetType: "ticket",
+    targetId: ticket.id,
+    metadata: { rating },
+  });
+  return { ok: true as const, csat: rating, alreadyRated: false };
 }
 
 /** Cliente responde na thread de um ticket (não aciona IA; é conversa humana). */

@@ -50,8 +50,8 @@ export default async function MetricsPage() {
       </div>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-medium text-gray-500">Tempo médio de resposta</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <h2 className="text-sm font-medium text-gray-500">Tempo de resposta e satisfação</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Card
             label="Resposta da IA"
             value={fmt(m.avgAiResponseSeconds)}
@@ -68,6 +68,13 @@ export default async function MetricsPage() {
               m.humanResponseSamples > 0
                 ? `média de ${m.humanResponseSamples} resposta(s)`
                 : "sem dados ainda"
+            }
+          />
+          <Card
+            label="Satisfação (CSAT)"
+            value={m.csatAverage != null ? `${m.csatAverage} / 5` : "—"}
+            hint={
+              m.csatCount > 0 ? `${m.csatCount} avaliação(ões)` : "sem avaliações ainda"
             }
           />
         </div>
@@ -99,9 +106,8 @@ export default async function MetricsPage() {
       </section>
 
       <p className="text-xs text-gray-400">
-        Os tempos de resposta medem da última fala do cliente até a resposta (IA ou atendente).
-        Satisfação (CSAT) ainda não é coletada — entra numa próxima evolução (exige um mecanismo de
-        avaliação no widget).
+        Os tempos de resposta medem da última fala do cliente até a resposta (IA ou atendente). O
+        CSAT vem da avaliação (1–5) que o cliente dá no widget quando o chamado é resolvido.
       </p>
     </div>
   );

@@ -36,6 +36,7 @@ function start(config: WidgetConfig) {
     onOpenThread: openThread,
     onSendThreadMessage: sendThreadMessage,
     onCloseThread: closeThread,
+    onRateTicket: rateThreadTicket,
   });
   ui.mount();
 
@@ -123,11 +124,23 @@ function start(config: WidgetConfig) {
       const { ticket, messages } = await api.getTicketThread(ticketId);
       ui.openThreadView(ticket.subject);
       ui.renderThreadMessages(messages);
+      ui.renderThreadRating(ticket);
     } catch {
       ui.openThreadView("Chamado");
     }
     startThreadPolling();
     markSeen();
+  }
+
+  async function rateThreadTicket(rating: number) {
+    if (!activeTicketId) return;
+    try {
+      await api.rateTicket(activeTicketId, rating);
+      const { ticket } = await api.getTicketThread(activeTicketId);
+      ui.renderThreadRating(ticket);
+    } catch {
+      /* silencioso */
+    }
   }
 
   function closeThread() {
@@ -153,8 +166,9 @@ function start(config: WidgetConfig) {
     threadPoll = setInterval(async () => {
       if (!activeTicketId) return;
       try {
-        const { messages } = await api.getTicketThread(activeTicketId);
+        const { ticket, messages } = await api.getTicketThread(activeTicketId);
         for (const m of messages) ui.addThreadMessage(m);
+        ui.renderThreadRating(ticket);
       } catch {
         /* silencioso */
       }

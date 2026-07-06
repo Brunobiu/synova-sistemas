@@ -1,4 +1,5 @@
 import type { Priority } from "@synova/shared";
+import { buildCsatNote, parseCsatNote } from "@synova/shared";
 import type { HistoryItem, TicketSummary } from "@synova/ai";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { signedUrl } from "./storage";
@@ -614,4 +615,38 @@ export async function countAdminMessagesSince(chatIds: string[], since: string):
     .gt("created_at", since)
     .limit(100);
   return (data ?? []).length;
+}
+
+/** Grava a avaliação (CSAT) como um evento do ticket (note "csat:N"). Sem migration. */
+export async function insertCsatEvent(params: {
+  ticketId: string;
+  systemId: string;
+  tenantId: string;
+  actorId?: string | null;
+  rating: number;
+  comment?: string;
+}): Promise<void> {
+  const db: DB = getServiceSupabase();
+  await db.from("ticket_events").insert({
+    ticket_id: params.ticketId,
+    system_id: params.systemId,
+    tenant_id: params.tenantId,
+    actor_type: "user",
+    actor_id: params.actorId ?? null,
+    note: buildCsatNote(params.rating, params.comment),
+  });
+}
+
+/** Nota CSAT atual do ticket (a mais recente), ou null se ainda não avaliado. */
+export async function getTicketCsat(ticketId: string): Promise<number | null> {
+  const db: DB = getServiceSupabase();
+  const { data } = await db
+    .from("ticket_events")
+    .select("note")
+    .eq("ticket_id", ticketId)
+    .like("note", "csat:%")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return parseCsatNote((data as { note: string | null } | null)?.note);
 }

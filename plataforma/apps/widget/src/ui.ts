@@ -14,6 +14,13 @@ export interface UICallbacks {
   onOpenThread: (ticketId: string) => void;
   onSendThreadMessage: (content: string) => void;
   onCloseThread: () => void;
+  onRateTicket: (rating: number) => void;
+}
+
+/** Dados mínimos do ticket usados para decidir a avaliação (CSAT). */
+export interface ThreadTicket {
+  status: string;
+  csat: number | null;
 }
 
 const SENDER_CLASS: Record<string, string> = {
@@ -48,6 +55,7 @@ export class WidgetUI {
   private open = false;
   private seen = new Set<string>();
   private threadSeen = new Set<string>();
+  private lastRatingKey = "";
 
   constructor(
     private cfg: WidgetConfig,
@@ -325,6 +333,10 @@ export class WidgetUI {
     (this.root.querySelector(".thread-title") as HTMLElement).textContent = subject;
     this.threadMessages.innerHTML = "";
     this.threadSeen.clear();
+    this.lastRatingKey = "";
+    const rating = this.root.querySelector(".thread-rating") as HTMLElement;
+    rating.style.display = "none";
+    rating.innerHTML = "";
   }
 
   backToList(): void {
@@ -346,6 +358,59 @@ export class WidgetUI {
     this.threadMessages.appendChild(this.buildMessageEl(item));
     this.scrollDown(this.threadMessages);
     return true;
+  }
+
+  /**
+   * Avaliação (CSAT): só aparece quando o chamado está resolvido/fechado.
+   * Mostra estrelas clicáveis se ainda não avaliado, ou um agradecimento se já.
+   */
+  renderThreadRating(ticket: ThreadTicket): void {
+    const box = this.root.querySelector(".thread-rating") as HTMLElement;
+    const resolved = ticket.status === "resolved" || ticket.status === "closed";
+    const key = `${resolved}:${ticket.csat ?? ""}`;
+    if (key === this.lastRatingKey) return; // evita re-render (flicker) no polling
+    this.lastRatingKey = key;
+
+    box.innerHTML = "";
+    if (!resolved) {
+      box.style.display = "none";
+      return;
+    }
+    box.style.display = "block";
+
+    if (ticket.csat != null) {
+      const thanks = document.createElement("div");
+      thanks.className = "rating-thanks";
+      thanks.textContent = `Obrigado pela avaliação: ${"★".repeat(ticket.csat)}${"☆".repeat(5 - ticket.csat)}`;
+      box.appendChild(thanks);
+      return;
+    }
+
+    const label = document.createElement("div");
+    label.className = "rating-label";
+    label.textContent = "Como foi o atendimento?";
+    box.appendChild(label);
+
+    const stars = document.createElement("div");
+    stars.className = "rating-stars";
+    for (let i = 1; i <= 5; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "star";
+      btn.textContent = "★";
+      btn.setAttribute("aria-label", `${i} de 5`);
+      btn.addEventListener("mouseenter", () => this.highlightStars(stars, i));
+      btn.addEventListener("mouseleave", () => this.highlightStars(stars, 0));
+      btn.addEventListener("click", () => this.cb.onRateTicket(i));
+      stars.appendChild(btn);
+    }
+    box.appendChild(stars);
+  }
+
+  private highlightStars(container: HTMLElement, upTo: number): void {
+    container.querySelectorAll(".star").forEach((s, idx) => {
+      (s as HTMLElement).classList.toggle("on", idx < upTo);
+    });
   }
 
   private scrollDown(el: HTMLElement): void {
@@ -436,6 +501,12 @@ export class WidgetUI {
         .thread-back { border: none; background: #e5e7eb; color: #374151; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 16px; }
         .thread-title { font-size: 13px; font-weight: 600; color: #111827; word-break: break-word; }
         .thread-composer { display: flex; gap: 6px; padding: 10px; border-top: 1px solid #e5e7eb; align-items: flex-end; }
+        .thread-rating { padding: 8px 12px; border-top: 1px solid #e5e7eb; background: #fff; text-align: center; }
+        .rating-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+        .rating-stars { display: flex; justify-content: center; gap: 4px; }
+        .rating-stars .star { border: none; background: transparent; cursor: pointer; font-size: 22px; line-height: 1; color: #d1d5db; padding: 0; }
+        .rating-stars .star.on { color: #f59e0b; }
+        .rating-thanks { font-size: 12px; color: #059669; }
       </style>
       <button class="launcher" aria-label="Abrir suporte">&#128172;<span class="badge" style="display:none">0</span></button>
       <div class="panel" role="dialog" aria-label="Suporte">
@@ -483,6 +554,7 @@ export class WidgetUI {
               <span class="thread-title"></span>
             </div>
             <div class="thread-messages"></div>
+            <div class="thread-rating" style="display:none"></div>
             <div class="thread-composer">
               <textarea class="thread-input" placeholder="Responder..."></textarea>
               <button class="thread-send" aria-label="Enviar">&#10148;</button>

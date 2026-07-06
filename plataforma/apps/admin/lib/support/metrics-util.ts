@@ -17,6 +17,8 @@ export interface MetricsInput {
   systemNames: Record<string, string>;
   /** Mensagens (escopadas) para os tempos de resposta. Opcional. */
   messages?: MetricMessage[];
+  /** Notas de CSAT (1..5) já extraídas dos eventos de ticket. Opcional. */
+  csatRatings?: number[];
 }
 
 const RESOLVED = new Set(["resolved", "closed"]);
@@ -42,6 +44,10 @@ export interface Metrics {
   aiResponseSamples: number;
   /** Nº de pares cliente→atendente considerados. */
   humanResponseSamples: number;
+  /** Média de satisfação (CSAT, 1..5) com 1 casa decimal; null = sem avaliações. */
+  csatAverage: number | null;
+  /** Nº de chamados avaliados. */
+  csatCount: number;
 }
 
 export interface ResponseTimes {
@@ -127,6 +133,12 @@ export function computeMetrics(input: MetricsInput): Metrics {
 
   const responseTimes = computeResponseTimes(input.messages ?? []);
 
+  const csatRatings = input.csatRatings ?? [];
+  const csatAverage =
+    csatRatings.length > 0
+      ? Math.round((csatRatings.reduce((a, b) => a + b, 0) / csatRatings.length) * 10) / 10
+      : null;
+
   return {
     totalTickets: input.tickets.length,
     openTickets: open,
@@ -139,5 +151,7 @@ export function computeMetrics(input: MetricsInput): Metrics {
     escalationRate: pct(escalatedChats, totalChats),
     autoResolutionRate: pct(totalChats - escalatedChats, totalChats),
     ...responseTimes,
+    csatAverage,
+    csatCount: csatRatings.length,
   };
 }

@@ -155,7 +155,7 @@ export class WidgetApi {
   }
 
   async getTicketThread(ticketId: string): Promise<{
-    ticket: { id: string; subject: string; status: string; priority: string };
+    ticket: { id: string; subject: string; status: string; priority: string; csat: number | null };
     messages: MessageItem[];
   }> {
     const res = await this.fetchImpl(
@@ -163,6 +163,19 @@ export class WidgetApi {
       { method: "GET", headers: this.authHeaders(false) },
     );
     return this.unwrap(res);
+  }
+
+  async rateTicket(
+    ticketId: string,
+    rating: number,
+    comment?: string,
+  ): Promise<{ csat: number; alreadyRated: boolean }> {
+    const res = await this.fetchImpl(this.url("/api/widget/ticket-rating"), {
+      method: "POST",
+      headers: this.authHeaders(true),
+      body: JSON.stringify({ ticketId, rating, comment }),
+    });
+    return this.unwrap<{ csat: number; alreadyRated: boolean }>(res);
   }
 
   async sendTicketMessage(

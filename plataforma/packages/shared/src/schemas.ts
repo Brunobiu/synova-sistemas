@@ -63,6 +63,14 @@ export const widgetUpdatesQuerySchema = z.object({
 });
 export type WidgetUpdatesQuery = z.infer<typeof widgetUpdatesQuerySchema>;
 
+/** Corpo da avaliação (CSAT) de um chamado pelo cliente. */
+export const widgetTicketRatingSchema = z.object({
+  ticketId: z.string().uuid(),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().max(500).optional(),
+});
+export type WidgetTicketRatingInput = z.infer<typeof widgetTicketRatingSchema>;
+
 // --- Contratos de saída (respostas dos endpoints do widget) ---
 
 export const widgetMessageItemSchema = z.object({

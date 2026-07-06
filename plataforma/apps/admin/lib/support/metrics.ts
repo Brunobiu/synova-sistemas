@@ -1,4 +1,5 @@
 import type { Priority } from "@synova/shared";
+import { parseCsatNote } from "@synova/shared";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { computeMetrics, type Metrics } from "./metrics-util";
 
@@ -7,7 +8,7 @@ import { computeMetrics, type Metrics } from "./metrics-util";
 
 export async function getMetrics(): Promise<Metrics> {
   const db = await getServerSupabase();
-  const [ticketsRes, chatsRes, systemsRes, messagesRes] = await Promise.all([
+  const [ticketsRes, chatsRes, systemsRes, messagesRes, csatRes] = await Promise.all([
     db.from("tickets").select("priority, status, system_id, chat_id").limit(5000),
     db.from("chats").select("id, status").limit(5000),
     db.from("systems").select("id, name"),
@@ -16,6 +17,12 @@ export async function getMetrics(): Promise<Metrics> {
       .select("chat_id, sender_type, created_at")
       .order("created_at", { ascending: true })
       .limit(20000),
+    db
+      .from("ticket_events")
+      .select("ticket_id, note")
+      .like("note", "csat:%")
+      .order("created_at", { ascending: false })
+      .limit(5000),
   ]);
 
   const tickets = ((ticketsRes.data ?? []) as Array<{
@@ -47,5 +54,17 @@ export async function getMetrics(): Promise<Metrics> {
     createdAt: row.created_at,
   }));
 
-  return computeMetrics({ tickets, chats, systemNames, messages });
+  // CSAT: uma nota por ticket (a mais recente vem primeiro, pois ordenamos desc).
+  const csatRows = (csatRes.data ?? []) as Array<{ ticket_id: string; note: string | null }>;
+  const seenCsat = new Set<string>();
+  const csatRatings: number[] = [];
+  for (const row of csatRows) {
+    if (seenCsat.has(row.ticket_id)) continue;
+    const rating = parseCsatNote(row.note);
+    if (rating == null) continue;
+    seenCsat.add(row.ticket_id);
+    csatRatings.push(rating);
+  }
+
+  return computeMetrics({ tickets, chats, systemNames, messages, csatRatings });
 }
