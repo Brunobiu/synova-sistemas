@@ -163,6 +163,42 @@ Free HTML CSS Template
         .carousel-3d.intro-spin {
             animation: carouselIntroSpin 2.6s cubic-bezier(0.2, 0.8, 0.25, 1);
         }
+
+        /* ===== Ajustes do HERO no celular ===== */
+        @media (max-width: 768px) {
+
+            /* Título: um pouco mais pra baixo (pra não encostar no "BEM-VINDO") e menor */
+            .hero-content {
+                width: 88%;
+                max-width: 440px;
+                top: calc(30vh + 145px);
+            }
+
+            .hero-title {
+                font-size: 1.5rem;
+            }
+
+            /* Subtítulo menor e menos espaçado */
+            .hero-subtitle {
+                font-size: 0.8rem;
+                letter-spacing: 0.12em;
+                margin-bottom: 26px;
+            }
+
+            /* Botões lado a lado na mesma linha: FALE CONOSCO (esq.) + VEJA NOSSOS SISTEMAS (dir.) */
+            .hero-cta-group {
+                flex-wrap: nowrap;
+                gap: 10px;
+            }
+
+            .hero-cta-group .cta-button {
+                flex: 1 1 0;
+                min-width: 0;
+                padding: 12px 8px;
+                font-size: 0.78rem;
+                text-align: center;
+            }
+        }
     </style>
     <noscript>
         <style>
