@@ -1,10 +1,10 @@
 import { requireAdmin } from "@/lib/auth";
-import { listAdmins } from "@/lib/auth/admins";
+import { listAdmins, getRootAdminId } from "@/lib/auth/admins";
 import { AdminsSection } from "@/components/erp/admins-section";
 
 export default async function AdminsPage() {
   const user = await requireAdmin();
-  const admins = await listAdmins();
+  const [admins, rootId] = await Promise.all([listAdmins(), getRootAdminId()]);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -15,7 +15,7 @@ export default async function AdminsPage() {
           atendimento.
         </p>
       </div>
-      <AdminsSection admins={admins} currentAdminId={user.id} />
+      <AdminsSection admins={admins} currentAdminId={user.id} rootId={rootId} />
     </div>
   );
 }

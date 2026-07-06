@@ -59,3 +59,36 @@ export async function createAdmin(
 
   return { id: userId, outcome: "created" };
 }
+
+/** ID do administrador "root" (o mais antigo): protegido de alteração/exclusão. */
+export async function getRootAdminId(): Promise<string | null> {
+  const supabase = await getServerSupabase();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "admin")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return (data as { id: string } | null)?.id ?? null;
+}
+
+/** Altera o papel de uma conta (admin ↔ agent). Via service client. */
+export async function updateAdminRole(userId: string, role: Role): Promise<void> {
+  const svc = getServiceSupabase();
+  const { error } = await svc.from("profiles").update({ role }).eq("id", userId);
+  if (error) throw error;
+}
+
+/**
+ * Exclui a conta por completo: desvincula de chats/tickets (a FK para auth.users
+ * é RESTRICT e travaria a exclusão) e então remove o usuário do Auth — o perfil
+ * some por cascade. O histórico de atendimento é preservado (apenas desatribuído).
+ */
+export async function deleteAdminAccount(userId: string): Promise<void> {
+  const svc = getServiceSupabase();
+  await svc.from("chats").update({ assigned_admin_id: null }).eq("assigned_admin_id", userId);
+  await svc.from("tickets").update({ assigned_admin_id: null }).eq("assigned_admin_id", userId);
+  const { error } = await svc.auth.admin.deleteUser(userId);
+  if (error) throw error;
+}

@@ -1,24 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ProfileRow } from "@synova/database";
 import { adminInviteSchema, type AdminInviteInput } from "@/lib/auth/schema";
 import { ROLE_LABELS } from "@/lib/auth/roles";
-import { inviteAdminAction } from "@/app/erp/admins/actions";
+import {
+  inviteAdminAction,
+  changeAdminRoleAction,
+  deleteAdminAction,
+} from "@/app/erp/admins/actions";
 import { Button } from "@/components/ui/button";
 
 export function AdminsSection({
   admins,
   currentAdminId,
+  rootId,
 }: {
   admins: ProfileRow[];
   currentAdminId: string | null;
+  rootId: string | null;
 }) {
   const router = useRouter();
   const [msg, setMsg] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
   const {
     register,
     handleSubmit,
@@ -41,27 +48,86 @@ export function AdminsSection({
     }
   }
 
+  function onChangeRole(userId: string, role: string) {
+    setMsg(null);
+    startTransition(async () => {
+      const res = await changeAdminRoleAction(userId, role);
+      router.refresh();
+      setMsg(res.ok ? "Papel atualizado ✓" : res.error);
+    });
+  }
+
+  function onDelete(userId: string, email: string | null) {
+    const ok = window.confirm(
+      `Excluir a conta ${email ?? ""}? Ela perde todo o acesso. Não dá para desfazer.`,
+    );
+    if (!ok) return;
+    setMsg(null);
+    startTransition(async () => {
+      const res = await deleteAdminAction(userId);
+      router.refresh();
+      setMsg(res.ok ? "Conta excluída ✓" : res.error);
+    });
+  }
+
   return (
     <div className="space-y-4">
       <div className="divide-y rounded-md border text-sm">
-        {admins.map((a) => (
-          <div key={a.id} className="flex items-center justify-between gap-3 px-3 py-2">
-            <div className="min-w-0">
-              <div className="truncate font-medium">
-                {a.email ?? "(sem e-mail)"}
-                {a.id === currentAdminId ? (
-                  <span className="ml-2 text-xs text-gray-400">(você)</span>
-                ) : null}
+        {admins.map((a) => {
+          const isRoot = a.id === rootId;
+          const isSelf = a.id === currentAdminId;
+          const locked = isRoot || isSelf;
+          return (
+            <div
+              key={`${a.id}-${a.role}`}
+              className="flex items-center justify-between gap-3 px-3 py-2"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 truncate font-medium">
+                  <span className="truncate">{a.email ?? "(sem e-mail)"}</span>
+                  {isSelf && <span className="text-xs text-gray-400">(você)</span>}
+                  {isRoot && (
+                    <span className="rounded bg-gray-900 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                      root
+                    </span>
+                  )}
+                </div>
+                <div className="truncate text-gray-500">
+                  Desde {new Date(a.created_at).toLocaleDateString("pt-BR")}
+                </div>
               </div>
-              <div className="truncate text-gray-500">
-                Desde {new Date(a.created_at).toLocaleDateString("pt-BR")}
+
+              <div className="flex shrink-0 items-center gap-2">
+                {locked ? (
+                  <span className="rounded-full border px-2 py-0.5 text-xs text-gray-600">
+                    {ROLE_LABELS[a.role] ?? a.role}
+                  </span>
+                ) : (
+                  <>
+                    <select
+                      defaultValue={a.role}
+                      disabled={pending}
+                      onChange={(e) => onChangeRole(a.id, e.target.value)}
+                      className="rounded-md border bg-white px-2 py-1 text-xs"
+                      aria-label={`Papel de ${a.email ?? "conta"}`}
+                    >
+                      <option value="agent">Atendente</option>
+                      <option value="admin">Administrador</option>
+                    </select>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pending}
+                      onClick={() => onDelete(a.id, a.email)}
+                    >
+                      Excluir
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
-            <span className="rounded-full border px-2 py-0.5 text-xs text-gray-600">
-              {ROLE_LABELS[a.role] ?? a.role}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <form
@@ -109,8 +175,8 @@ export function AdminsSection({
 
       <p className="text-xs text-gray-400">
         A conta já entra com o e-mail confirmado e a senha definida aqui. Peça para a
-        pessoa trocar a senha no primeiro acesso. O atendente enxerga apenas a área de
-        Atendimento.
+        pessoa trocar a senha no primeiro acesso. O administrador root não pode ser
+        alterado nem excluído.
       </p>
       {msg && <span className="text-sm text-gray-500">{msg}</span>}
     </div>
