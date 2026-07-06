@@ -236,6 +236,6 @@ export interface AiProviderConfigRow {
 export interface ProfileRow {
   id: string;
   email: string | null;
-  role: "admin";
+  role: "admin" | "agent";
   created_at: Ts;
 }

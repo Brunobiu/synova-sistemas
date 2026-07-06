@@ -22,7 +22,7 @@ export async function inviteAdminAction(
   const email = normalizeEmail(parsed.data.email);
 
   try {
-    const { id, outcome } = await createAdmin(email, parsed.data.password);
+    const { id, outcome } = await createAdmin(email, parsed.data.password, parsed.data.role);
     if (outcome === "exists") {
       return { ok: false, error: "Já existe um usuário com esse e-mail." };
     }
@@ -35,11 +35,11 @@ export async function inviteAdminAction(
       targetType: "profile",
       targetId: id ?? undefined,
       ip: clientIpFromHeaders(await headers()),
-      metadata: { email },
+      metadata: { email, role: parsed.data.role },
     });
     revalidatePath("/erp/admins");
     return { ok: true };
   } catch {
-    return { ok: false, error: "Não foi possível criar o administrador." };
+    return { ok: false, error: "Não foi possível criar a conta." };
   }
 }

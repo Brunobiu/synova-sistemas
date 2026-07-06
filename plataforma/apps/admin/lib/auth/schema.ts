@@ -9,10 +9,12 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
-// Convite de admin (Opção A): cria o usuário com uma senha inicial já confirmada,
+// Convite de conta (Opção A): cria o usuário com uma senha inicial já confirmada,
 // sem depender de e-mail/SMTP. A senha exige um mínimo mais alto que o login.
+// O papel define o acesso: admin (dono, total) ou agent (só atendimento).
 export const adminInviteSchema = z.object({
   email: z.string().email("E-mail inválido").max(200),
   password: z.string().min(8, "Mínimo de 8 caracteres").max(200),
+  role: z.enum(["admin", "agent"]),
 });
 export type AdminInviteInput = z.infer<typeof adminInviteSchema>;

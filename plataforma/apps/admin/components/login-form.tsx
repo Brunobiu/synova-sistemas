@@ -58,7 +58,7 @@ export function LoginForm({
         }
         return;
       }
-      router.push(nextPath);
+      router.push(res.redirectTo || nextPath);
       router.refresh();
     } catch {
       setErro("Não foi possível conectar. Verifique a configuração do Supabase.");

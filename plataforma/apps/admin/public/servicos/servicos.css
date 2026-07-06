@@ -1,0 +1,634 @@
+/* ===========================================================
+   Synova — Páginas de detalhe dos serviços
+   Reutiliza o tema global (/tooplate-parallax-depth.css):
+   fontes, variáveis de cor, .cta-button, .stars, .mouse-follower
+   =========================================================== */
+
+.svc-page {
+    position: relative;
+    z-index: 20;
+    min-height: 100vh;
+}
+
+/* ---------- Barra superior ---------- */
+.svc-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 5%;
+    background: rgba(10, 10, 10, 0.65);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.svc-logo img {
+    height: 44px;
+    width: auto;
+    display: block;
+    filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+    transition: transform 0.3s ease;
+}
+
+.svc-logo:hover img {
+    transform: scale(1.05);
+}
+
+.svc-back {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+}
+
+.svc-back:hover {
+    color: #fff;
+    border-color: #fff;
+    transform: translateX(-3px);
+}
+
+/* ---------- Hero ---------- */
+.svc-hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 90px 5% 56px;
+    text-align: center;
+}
+
+.svc-eyebrow {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 999px;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    background:
+        linear-gradient(#050505, #050505) padding-box,
+        linear-gradient(90deg, #9a9a9a, #8a8a8a) border-box;
+    border: 1px solid transparent;
+    margin-bottom: 26px;
+}
+
+.svc-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    font-weight: 900;
+    line-height: 1.08;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 22px;
+}
+
+.svc-provoke {
+    font-family: var(--font-heading);
+    font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+    font-weight: 600;
+    font-style: italic;
+    color: #fff;
+    line-height: 1.4;
+    margin-bottom: 22px;
+    text-shadow: 0 0 24px rgba(255, 255, 255, 0.2);
+}
+
+.svc-lead {
+    font-family: var(--font-heading);
+    font-size: 1.08rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 34px;
+}
+
+.svc-hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* ---------- Conteúdo ---------- */
+.svc-main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 5% 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.svc-block {
+    padding: 38px 40px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+}
+
+.svc-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #fff;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.svc-h2-icon {
+    font-size: 1.4rem;
+    -webkit-text-fill-color: initial;
+}
+
+.svc-block p {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.svc-block p strong {
+    color: #fff;
+}
+
+.svc-block p+p {
+    margin-top: 14px;
+}
+
+/* Subtítulo dentro de um bloco */
+.svc-subtitle {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 28px 0 14px;
+}
+
+.svc-subtitle:first-child {
+    margin-top: 0;
+}
+
+/* Lista com marcador (check / mais) */
+.svc-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px 26px;
+    margin: 0;
+    padding: 0;
+}
+
+.svc-list li {
+    position: relative;
+    padding-left: 34px;
+    font-family: var(--font-heading);
+    font-size: 1.02rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.svc-list li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0a0a0a;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.svc-list.svc-list--plus li::before {
+    content: '+';
+    font-size: 1rem;
+}
+
+/* Chips "ideal para" */
+.svc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.svc-chip {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.svc-chip:hover {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #0a0a0a;
+    transform: translateY(-3px);
+}
+
+/* Casos / exemplos */
+.svc-cases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.svc-case {
+    padding: 26px 24px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.svc-case h3 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.svc-steps {
+    list-style: none;
+    counter-reset: step;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.svc-steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 40px;
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.svc-steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: -2px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0a0a0a;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+/* Grade de mini-cards (usada em "sob medida") */
+.svc-modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.svc-module {
+    padding: 28px 26px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.svc-module:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 18px 40px rgba(255, 255, 255, 0.12);
+}
+
+.svc-module-icon {
+    font-size: 30px;
+    margin-bottom: 14px;
+}
+
+.svc-module h3 {
+    font-family: var(--font-heading);
+    font-size: 1.12rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.svc-module ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.svc-module li {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.78);
+    padding-left: 16px;
+    position: relative;
+}
+
+.svc-module li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+/* Nota destacada */
+.svc-note {
+    padding: 22px 26px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 3px solid #fff;
+    font-family: var(--font-heading);
+    font-size: 1.02rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* CTA final */
+.svc-cta {
+    text-align: center;
+    padding: 54px 40px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+}
+
+.svc-cta h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3.5vw, 2.1rem);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    margin-bottom: 16px;
+    line-height: 1.2;
+}
+
+.svc-cta p {
+    font-family: var(--font-heading);
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.82);
+    max-width: 640px;
+    margin: 0 auto 30px;
+}
+
+/* Próximo passo (upsell) */
+.svc-next {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 26px;
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    transition: color 0.3s ease, gap 0.3s ease;
+}
+
+.svc-next:hover {
+    color: #fff;
+    gap: 14px;
+}
+
+/* Rodapé */
+.svc-footer {
+    position: relative;
+    text-align: center;
+    padding: 40px 5%;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 20px;
+}
+
+/* Botão "voltar ao topo" — fica no rodapé, no lado direito da página */
+.to-top {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    margin-top: -26px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    color: #0a0a0a;
+    background: linear-gradient(135deg, #ffffff, #8a8a8a);
+    box-shadow: 0 8px 22px rgba(255, 255, 255, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 5;
+}
+
+.to-top:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 600px) {
+    .to-top {
+        position: static;
+        margin: 0 auto 22px;
+        top: auto;
+    }
+}
+
+.svc-footer a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.svc-footer p {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.8;
+}
+
+/* Revelar ao rolar */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+
+    .svc-block,
+    .svc-cta {
+        padding: 28px 22px;
+    }
+
+    .svc-hero {
+        padding: 60px 5% 40px;
+    }
+
+    .svc-back {
+        padding: 8px 14px;
+        font-size: 0.78rem;
+    }
+
+    .svc-logo img {
+        height: 38px;
+    }
+}
+
+
+/* ===========================================================
+   Lista de sistemas (portfólio) — foto à esquerda, texto à direita
+   Estrutura pronta para depois ser gerada pelo banco de dados.
+   =========================================================== */
+.sys-list {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.sys-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 30px;
+    align-items: center;
+    padding: 22px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.sys-item:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 18px 40px rgba(255, 255, 255, 0.1);
+}
+
+.sys-media {
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sys-media img,
+.sys-media video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.sys-tag {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 10px;
+}
+
+.sys-body h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.sys-body p {
+    font-family: var(--font-heading);
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 16px;
+}
+
+.sys-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sys-tags span {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+@media (max-width: 760px) {
+    .sys-item {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}

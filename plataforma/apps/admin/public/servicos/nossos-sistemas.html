@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossos Sistemas | Synova Sistemas</title>
+    <meta name="description"
+        content="Conheça alguns dos sistemas que a Synova já desenvolveu e colocou no ar — sob medida para resolver problemas reais de cada negócio.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link href="/tooplate-parallax-depth.css" rel="stylesheet">
+    <link href="servicos.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="mouse-follower" id="mouseFollower"></div>
+
+    <div class="svc-page">
+
+        <header class="svc-topbar">
+            <a href="/" class="svc-logo" title="Voltar ao início">
+                <img src="/fotos/synova.jpeg" alt="Synova Sistemas">
+            </a>
+            <a href="/" class="svc-back">← Voltar ao início</a>
+        </header>
+
+        <section class="svc-hero">
+            <span class="svc-eyebrow">Portfólio · Projetos no ar</span>
+            <h1 class="svc-title">Nossos Sistemas</h1>
+            <p class="svc-provoke">Promessa todo mundo faz. A gente prefere mostrar.</p>
+            <p class="svc-lead">
+                Aqui estão alguns dos sistemas que já desenvolvemos e colocamos para funcionar. Cada projeto foi
+                feito <strong>sob medida</strong> para resolver um problema real de um negócio. Dá uma olhada — o
+                próximo pode ser o seu.
+            </p>
+        </section>
+
+        <main class="svc-main">
+
+            <!--
+                LISTA DE SISTEMAS (exemplos / placeholders).
+                Depois estes cards podem ser gerados automaticamente pelo seu banco de dados.
+
+                Modelo de cada item (classes):
+                article.sys-item  >  div.sys-media (img OU video)  +  div.sys-body (span.sys-tag, h3, p, div.sys-tags)
+
+                Para usar vídeo no lugar da imagem, coloque dentro de .sys-media uma tag
+                video com src="/videos/seu-video.mp4" e controls, no lugar da tag img.
+
+                Troque as imagens /images/1.png, 2.png e 3.png pelos prints/telas reais.
+            -->
+            <div class="sys-list">
+
+                <article class="sys-item">
+                    <div class="sys-media">
+                        <img src="/images/1.png" alt="Sistema de agendamento (exemplo)">
+                    </div>
+                    <div class="sys-body">
+                        <span class="sys-tag">Agendamento</span>
+                        <h3>Barbearia Estilo</h3>
+                        <p>Sistema de agendamento online com confirmação automática, cadastro de clientes e
+                            controle de horários. O cliente marca pelo celular e o profissional acompanha a agenda
+                            do dia em tempo real.</p>
+                        <div class="sys-tags">
+                            <span>Agendamento online</span>
+                            <span>Cadastro de clientes</span>
+                            <span>Painel</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="sys-item">
+                    <div class="sys-media">
+                        <img src="/images/2.png" alt="Loja virtual (exemplo)">
+                    </div>
+                    <div class="sys-body">
+                        <span class="sys-tag">E-commerce</span>
+                        <h3>Ana Modas</h3>
+                        <p>Loja virtual completa com pagamento online, controle de estoque e acompanhamento de
+                            pedidos. A cliente compra, paga e acompanha a entrega; a loja gerencia tudo por um único
+                            painel.</p>
+                        <div class="sys-tags">
+                            <span>Pagamento online</span>
+                            <span>Estoque</span>
+                            <span>Pedidos</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="sys-item">
+                    <div class="sys-media">
+                        <img src="/images/3.png" alt="Painel de gestão (exemplo)">
+                    </div>
+                    <div class="sys-body">
+                        <span class="sys-tag">Gestão</span>
+                        <h3>Clínica Vida</h3>
+                        <p>Painel de gestão com agenda de consultas, financeiro, relatórios e área exclusiva do
+                            paciente. Centraliza o atendimento e mantém todo o histórico salvo e organizado.</p>
+                        <div class="sys-tags">
+                            <span>Agenda</span>
+                            <span>Financeiro</span>
+                            <span>Área do cliente</span>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+            <section class="svc-cta reveal">
+                <h2>Quer um sistema como esses?</h2>
+                <p>Cada um desses projetos começou com uma simples conversa. Conta o que o seu negócio precisa e a
+                    gente transforma em um sistema sob medida.</p>
+                <a class="cta-button"
+                    href="https://wa.me/5562994757240?text=Ol%C3%A1!%20Vi%20os%20sistemas%20de%20voc%C3%AAs%20no%20site%20e%20quero%20um%20para%20o%20meu%20neg%C3%B3cio."
+                    target="_blank" rel="noopener">Falar com a Synova no WhatsApp</a>
+                <br>
+                <a class="svc-next" href="/#solucoes">Ver todas as soluções →</a>
+            </section>
+
+        </main>
+
+        <footer class="svc-footer">
+            <button type="button" class="to-top" aria-label="Voltar ao topo" title="Voltar ao topo"
+                onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">↑</button>
+            <p>© 2026 Synova Sistemas. Todos os direitos reservados. · <a href="/">Voltar ao início</a></p>
+        </footer>
+    </div>
+
+    <script src="servicos.js"></script>
+</body>
+
+</html>

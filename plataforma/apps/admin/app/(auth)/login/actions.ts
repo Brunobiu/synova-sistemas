@@ -11,9 +11,10 @@ import {
   loginRateLimiter,
   normalizeEmail,
 } from "@/lib/auth/login-guard";
+import { homeFor, isRole } from "@/lib/auth/roles";
 
 export type LoginResult =
-  | { ok: true }
+  | { ok: true; redirectTo: string }
   | { ok: false; error: string; retryAfterSeconds?: number };
 
 /**
@@ -71,7 +72,8 @@ export async function loginAction(input: LoginInput): Promise<LoginResult> {
     .eq("id", data.user.id)
     .maybeSingle();
 
-  if (profile?.role !== "admin") {
+  const role = (profile as { role?: string } | null)?.role;
+  if (!isRole(role)) {
     await supabase.auth.signOut();
     await logAudit({
       systemId: null,
@@ -80,9 +82,9 @@ export async function loginAction(input: LoginInput): Promise<LoginResult> {
       actorId: data.user.id,
       action: "admin.access_denied",
       ip,
-      metadata: { email, reason: "not_admin" },
+      metadata: { email, reason: "sem_papel" },
     });
-    return { ok: false, error: "Sua conta não tem permissão de administrador." };
+    return { ok: false, error: "Sua conta não tem acesso ao painel." };
   }
 
   await logAudit({
@@ -92,7 +94,7 @@ export async function loginAction(input: LoginInput): Promise<LoginResult> {
     actorId: data.user.id,
     action: "admin.login.success",
     ip,
-    metadata: { email },
+    metadata: { email, role },
   });
-  return { ok: true };
+  return { ok: true, redirectTo: homeFor(role) };
 }

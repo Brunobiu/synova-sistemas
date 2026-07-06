@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ProfileRow } from "@synova/database";
 import { adminInviteSchema, type AdminInviteInput } from "@/lib/auth/schema";
+import { ROLE_LABELS } from "@/lib/auth/roles";
 import { inviteAdminAction } from "@/app/erp/admins/actions";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +26,7 @@ export function AdminsSection({
     formState: { errors, isSubmitting },
   } = useForm<AdminInviteInput>({
     resolver: zodResolver(adminInviteSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", role: "agent" },
   });
 
   async function onInvite(values: AdminInviteInput) {
@@ -34,7 +35,7 @@ export function AdminsSection({
     if (res.ok) {
       reset();
       router.refresh();
-      setMsg("Administrador criado ✓");
+      setMsg("Conta criada ✓");
     } else {
       setMsg(res.error);
     }
@@ -53,11 +54,11 @@ export function AdminsSection({
                 ) : null}
               </div>
               <div className="truncate text-gray-500">
-                Admin desde {new Date(a.created_at).toLocaleDateString("pt-BR")}
+                Desde {new Date(a.created_at).toLocaleDateString("pt-BR")}
               </div>
             </div>
-            <span className="rounded-full border px-2 py-0.5 text-xs text-gray-500">
-              Administrador
+            <span className="rounded-full border px-2 py-0.5 text-xs text-gray-600">
+              {ROLE_LABELS[a.role] ?? a.role}
             </span>
           </div>
         ))}
@@ -89,16 +90,27 @@ export function AdminsSection({
             <p className="text-xs text-red-500">{errors.password.message}</p>
           )}
         </div>
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Papel</label>
+          <select
+            className="w-full rounded-md border bg-white px-2 py-1.5 text-sm"
+            {...register("role")}
+          >
+            <option value="agent">Atendente — só o atendimento</option>
+            <option value="admin">Administrador — acesso total</option>
+          </select>
+        </div>
         <div className="flex items-end">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "..." : "Adicionar administrador"}
+            {isSubmitting ? "..." : "Adicionar conta"}
           </Button>
         </div>
       </form>
 
       <p className="text-xs text-gray-400">
-        O novo admin já entra com o e-mail confirmado e a senha definida aqui. Peça para
-        ele trocar a senha depois do primeiro acesso.
+        A conta já entra com o e-mail confirmado e a senha definida aqui. Peça para a
+        pessoa trocar a senha no primeiro acesso. O atendente enxerga apenas a área de
+        Atendimento.
       </p>
       {msg && <span className="text-sm text-gray-500">{msg}</span>}
     </div>

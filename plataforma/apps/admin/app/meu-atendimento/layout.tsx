@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { PanelHeader } from "@/components/panel-header";
 
 export default async function SuporteLayout({
@@ -7,10 +7,10 @@ export default async function SuporteLayout({
 }: {
   children: ReactNode;
 }) {
-  await requireAdmin();
+  const { role } = await requireStaff();
   return (
     <div className="min-h-screen">
-      <PanelHeader />
+      <PanelHeader role={role} />
       <main className="p-6">{children}</main>
     </div>
   );

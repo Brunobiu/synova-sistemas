@@ -844,7 +844,8 @@ html {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 25px;
-	margin-top: 30px;
+	margin-top: 0;
+	align-self: center;
 }
 
 .info-box {
@@ -2539,122 +2540,7 @@ html {
 
 
 
-/* SECTION */
-.values-section {
-    padding: 80px 0;
-    position: relative;
-}
-
-/* CONTAINER */
-.values-container {
-    display: flex;
-    gap: 40px;
-    align-items: stretch;
-    position: relative;
-}
-
-/* ESQUERDA */
-.values-left {
-    position: relative;
-    width: 55%;
-    padding: 40px;
-    border-radius: 30px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.values-tag {
-    color: #cccccc;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-.values-title {
-    margin: 15px 0;
-    font-size: 32px;
-    font-weight: 700;
-}
-
-.values-text {
-    color: #ccc;
-    line-height: 1.6;
-    margin-bottom: 25px;
-}
-
-.values-btn {
-    background: linear-gradient(135deg, #b0b0b0, #7a7a7a);
-    padding: 14px 28px;
-    border-radius: 30px;
-    font-weight: 600;
-    color: #0a0a0a;
-    display: inline-block;
-}
-
-/* IMAGEM DE FUNDO */
-.values-bg {
-    position: absolute;
-    inset: 0;
-    background: url("images/6.png") center/cover no-repeat;
-    filter: brightness(0.5) blur(1px);
-    z-index: -1;
-}
-
-/* DIREITA */
-.values-right {
-    width: 45%;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.values-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3));
-    padding: 30px;
-    border-radius: 25px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.card-tag {
-    color: #cccccc;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.card-text {
-    margin-top: 10px;
-    color: #ddd;
-    line-height: 1.6;
-}
-
-/* CÍRCULO DECORATIVO */
-.card-circle {
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    background: rgba(255, 255, 255, 0.09);
-    border-radius: 50%;
-    bottom: -30px;
-    right: -30px;
-}
-
-/* RESPONSIVO */
-@media (max-width: 900px) {
-    .values-container {
-        flex-direction: column;
-    }
-
-    .values-left,
-    .values-right {
-        width: 100%;
-    }
-}
-
-
-
+/* (bloco .values-* removido — substituído pela seção "Nossas Soluções" na home) */
 
 .section-separator {
   text-align: center;

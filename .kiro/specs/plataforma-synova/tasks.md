@@ -171,6 +171,19 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 23, 24_
     - _Nota: `lib/observability.ts` faz log estruturado e é drop-in para Sentry via `SENTRY_DSN`; ligado nos catch das rotas do widget. Testes de compatibilidade garantem que a chave/segredo de um sistema não é aceita por outro. `.env.example` documenta as variáveis._
 
+- [ ] 16. Papéis de acesso do painel (Dono/Atendente) — v1
+  - [x] 16.1 Modelo de papéis (`admin`=dono, `agent`=atendente): tipos, permissões e destino por papel (`lib/auth/roles.ts`)
+    - _Requisitos: 18, 24_
+  - [x] 16.2 Guards por papel: `requireStaff` (admin|agent) e `requireOwner` (admin); login aceita atendente e redireciona por papel
+    - _Requisitos: 18_
+  - [x] 16.3 Aplicação nas rotas e no menu: `/meu-atendimento` exige staff, `/erp` exige owner, menu filtrado por papel; actions de suporte viram `requireStaff`
+    - _Requisitos: 18_
+  - [x] 16.4 Convite com escolha de papel em `/erp/admins` (auditado como `admin.invited` com o papel)
+    - _Requisitos: 18, 20_
+  - [ ] 16.5 Migração de RLS do atendente aplicada na nuvem (`is_staff()` + policies de atendimento)
+    - _Requisitos: 8_
+    - _Nota: migração escrita em `supabase/migrations/20260705120001_role_agent_access.sql` (idempotente). Os guards no app já estão ativos, mas a RLS é a camada que de fato barra e precisa ser APLICADA na nuvem (SQL editor do Supabase ou `supabase db push`) antes de criar/testar um atendente — enquanto o check de `profiles.role` não for relaxado, criar um `agent` falha no banco. Escopo por cliente (atendente ver só alguns sistemas) fica para a v2 (tabela `agent_systems`)._
+
 ---
 
 ## Observações

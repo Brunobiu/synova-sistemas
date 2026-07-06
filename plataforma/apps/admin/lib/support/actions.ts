@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { PRIORITIES, type Priority } from "@synova/shared";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 
@@ -27,7 +27,7 @@ async function getChat(db: DB, chatId: string): Promise<ChatScope | null> {
 }
 
 export async function replyAction(chatId: string, content: string): Promise<Result> {
-  const admin = await requireAdmin();
+  const { user: admin } = await requireStaff();
   if (!content.trim()) return { ok: false, error: "Mensagem vazia." };
   const db = await getServerSupabase();
   const chat = await getChat(db, chatId);
@@ -63,7 +63,7 @@ async function setChatMode(
   patch: { status: string; ai_paused: boolean },
   action: string,
 ): Promise<Result> {
-  const admin = await requireAdmin();
+  const { user: admin } = await requireStaff();
   const db = await getServerSupabase();
   const chat = await getChat(db, chatId);
   if (!chat) return { ok: false, error: "Conversa não encontrada." };
@@ -119,7 +119,7 @@ async function getTicket(db: DB, ticketId: string): Promise<TicketScope | null> 
 }
 
 export async function reclassifyTicketAction(ticketId: string, priority: string): Promise<Result> {
-  const admin = await requireAdmin();
+  const { user: admin } = await requireStaff();
   if (!PRIORITIES.includes(priority as Priority)) return { ok: false, error: "Prioridade inválida." };
   const db = await getServerSupabase();
   const ticket = await getTicket(db, ticketId);
@@ -156,7 +156,7 @@ export async function reclassifyTicketAction(ticketId: string, priority: string)
 }
 
 export async function resolveTicketAction(ticketId: string): Promise<Result> {
-  const admin = await requireAdmin();
+  const { user: admin } = await requireStaff();
   const db = await getServerSupabase();
   const ticket = await getTicket(db, ticketId);
   if (!ticket) return { ok: false, error: "Ticket não encontrado." };

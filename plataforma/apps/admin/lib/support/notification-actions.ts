@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 export type Result = { ok: true } | { ok: false; error: string };
 
 async function setStatus(id: string, status: "read" | "resolved"): Promise<Result> {
-  await requireAdmin();
+  await requireStaff();
   const db = await getServerSupabase();
   const patch: Record<string, unknown> = { status };
   if (status === "read") patch.read_at = new Date().toISOString();
@@ -27,7 +27,7 @@ export async function markNotificationResolved(id: string): Promise<Result> {
 
 /** Marca todas as não lidas como lidas (opcional na UI). */
 export async function markAllRead(): Promise<Result> {
-  await requireAdmin();
+  await requireStaff();
   const db = await getServerSupabase();
   const { error } = await db
     .from("notifications")

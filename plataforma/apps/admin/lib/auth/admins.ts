@@ -1,6 +1,7 @@
 import type { ProfileRow } from "@synova/database";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { getServiceSupabase } from "@/lib/supabase/service";
+import type { Role } from "./roles";
 
 /** Lista os administradores (via sessão do admin; RLS admin_all garante o acesso). */
 export async function listAdmins(): Promise<ProfileRow[]> {
@@ -33,6 +34,7 @@ function isAlreadyRegistered(error: unknown): boolean {
 export async function createAdmin(
   email: string,
   password: string,
+  role: Role,
 ): Promise<{ id: string | null; outcome: CreateAdminOutcome }> {
   const svc = getServiceSupabase();
 
@@ -52,7 +54,7 @@ export async function createAdmin(
   const userId = data.user.id;
   const { error: profileError } = await svc
     .from("profiles")
-    .upsert({ id: userId, email, role: "admin" });
+    .upsert({ id: userId, email, role });
   if (profileError) throw profileError;
 
   return { id: userId, outcome: "created" };

@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { requireAdmin } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 import { PanelHeader } from "@/components/panel-header";
 
 export default async function ErpLayout({ children }: { children: ReactNode }) {
-  await requireAdmin();
+  await requireOwner();
   return (
     <div className="min-h-screen">
-      <PanelHeader />
+      <PanelHeader role="admin" />
       <main className="p-6">{children}</main>
     </div>
   );

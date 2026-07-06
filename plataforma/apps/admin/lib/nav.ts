@@ -1,20 +1,30 @@
-// Navegação do painel: menu primário (consistente em todas as áreas) e a trilha
-// (breadcrumb) hierárquica de cada rota. Lógica pura, sem React, para ser testável.
+// Navegação do painel: menu de topo consistente em todas as áreas. Lógica pura,
+// sem React, para ser testável.
+
+import { canAccessErp, type Area, type Role } from "./auth/roles";
 
 export interface NavItem {
   label: string;
   href: string;
+  area: Area;
 }
 
 /** Menu de topo — o MESMO em todo o painel, para não "trocar" entre ERP e Atendimento. */
 export const PRIMARY_NAV: NavItem[] = [
-  { label: "Projetos", href: "/erp" },
-  { label: "IA", href: "/erp/ia" },
-  { label: "Admins", href: "/erp/admins" },
-  { label: "Atendimento", href: "/meu-atendimento" },
-  { label: "Notificações", href: "/meu-atendimento/notificacoes" },
-  { label: "Métricas", href: "/meu-atendimento/metricas" },
+  { label: "Projetos", href: "/erp", area: "erp" },
+  { label: "IA", href: "/erp/ia", area: "erp" },
+  { label: "Admins", href: "/erp/admins", area: "erp" },
+  { label: "Atendimento", href: "/meu-atendimento", area: "support" },
+  { label: "Notificações", href: "/meu-atendimento/notificacoes", area: "support" },
+  { label: "Métricas", href: "/meu-atendimento/metricas", area: "support" },
+  { label: "Landing page", href: "/erp/landing", area: "erp" },
 ];
+
+/** Itens de menu visíveis para o papel: atendente só vê a área de atendimento. */
+export function visibleNavFor(role: Role): NavItem[] {
+  if (canAccessErp(role)) return PRIMARY_NAV;
+  return PRIMARY_NAV.filter((item) => item.area === "support");
+}
 
 /** Decide se um item do menu está ativo para o caminho atual. */
 export function isNavActive(href: string, pathname: string): boolean {
@@ -25,35 +35,4 @@ export function isNavActive(href: string, pathname: string): boolean {
     return pathname === "/meu-atendimento" || pathname.startsWith("/meu-atendimento/chats");
   }
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-/** Trilha (breadcrumb) para o caminho atual. O último item é a página atual. */
-export function crumbsFor(pathname: string): NavItem[] {
-  const projetos: NavItem = { label: "Projetos", href: "/erp" };
-  const atendimento: NavItem = { label: "Atendimento", href: "/meu-atendimento" };
-
-  // ERP
-  if (pathname === "/erp") return [projetos];
-  if (pathname === "/erp/systems/new")
-    return [projetos, { label: "Novo sistema", href: pathname }];
-  if (pathname.startsWith("/erp/systems/"))
-    return [projetos, { label: "Sistema", href: pathname }];
-  if (pathname === "/erp/ia") return [{ label: "IA", href: "/erp/ia" }];
-  if (pathname === "/erp/admins") return [{ label: "Admins", href: "/erp/admins" }];
-
-  // Atendimento
-  if (pathname === "/meu-atendimento")
-    return [atendimento, { label: "Caixa", href: "/meu-atendimento" }];
-  if (pathname.startsWith("/meu-atendimento/chats/"))
-    return [
-      atendimento,
-      { label: "Caixa", href: "/meu-atendimento" },
-      { label: "Conversa", href: pathname },
-    ];
-  if (pathname === "/meu-atendimento/notificacoes")
-    return [atendimento, { label: "Notificações", href: "/meu-atendimento/notificacoes" }];
-  if (pathname === "/meu-atendimento/metricas")
-    return [atendimento, { label: "Métricas", href: "/meu-atendimento/metricas" }];
-
-  return [];
 }
