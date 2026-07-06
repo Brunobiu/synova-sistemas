@@ -31,7 +31,7 @@ export interface ProviderSummary {
 const MODEL_HINTS: Record<AiProviderName, { chat: string; embeddings: string }> = {
   openai: { chat: "gpt-4o-mini", embeddings: "text-embedding-3-small" },
   anthropic: { chat: "claude-3-5-sonnet-latest", embeddings: "—" },
-  google: { chat: "gemini-2.5-flash", embeddings: "text-embedding-004" },
+  google: { chat: "gemini-2.5-flash", embeddings: "gemini-embedding-001" },
 };
 
 function ProviderCard({ summary }: { summary: ProviderSummary }) {

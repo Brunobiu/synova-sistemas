@@ -1,6 +1,6 @@
 import type { AIProvider, AIProviderConfig, ChatInput, ChatResult } from "./types";
 import { parseChatResult } from "./schema";
-import { EMBEDDING_MODEL } from "./chunk";
+import { EMBEDDING_MODEL, EMBEDDING_DIM } from "./chunk";
 
 // Implementações reais dos provedores atrás da interface única AIProvider (R5.4).
 // Chamadas via fetch (sem SDK) para manter o pacote leve. A saída de chat é sempre
@@ -142,13 +142,16 @@ class GoogleProvider implements AIProvider {
   }
 
   async embed(texts: string[]): Promise<number[][]> {
-    const model = this.cfg.embeddingsModel || "text-embedding-004";
+    // gemini-embedding-001 suporta dimensão de saída flexível; pedimos EMBEDDING_DIM
+    // (1536) para casar com a coluna vector(1536). O índice é cosseno (escala-
+    // invariante), então não é preciso normalizar após o truncamento MRL.
+    const model = this.cfg.embeddingsModel || "gemini-embedding-001";
     const out: number[][] = [];
     for (const text of texts) {
       const data = (await postJson(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${encodeURIComponent(this.cfg.apiKey)}`,
         {},
-        { content: { parts: [{ text }] } },
+        { content: { parts: [{ text }] }, outputDimensionality: EMBEDDING_DIM },
         DEFAULT_TIMEOUT_MS,
       )) as { embedding?: { values?: number[] } };
       out.push(data.embedding?.values ?? []);
