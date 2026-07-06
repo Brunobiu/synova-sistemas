@@ -447,3 +447,112 @@ export async function insertAudit(params: {
     metadata: params.metadata ?? {},
   });
 }
+
+/** Vincula anexos a um ticket, SEMPRE escopado pelo system_id (isolamento). */
+export async function linkAttachmentsToTicket(
+  attachmentIds: string[],
+  ticketId: string,
+  systemId: string,
+): Promise<void> {
+  if (attachmentIds.length === 0) return;
+  const db: DB = getServiceSupabase();
+  await db
+    .from("attachments")
+    .update({ ticket_id: ticketId })
+    .in("id", attachmentIds)
+    .eq("system_id", systemId);
+}
+
+export interface WidgetTicketRow {
+  id: string;
+  subject: string;
+  status: string;
+  priority: Priority;
+  createdAt: string;
+}
+
+/** Lista os tickets do escopo (do usuário quando identificado; senão do tenant). */
+export async function listTicketsForScope(
+  systemId: string,
+  tenantId: string,
+  userId: string | null,
+): Promise<WidgetTicketRow[]> {
+  const db: DB = getServiceSupabase();
+  let q = db
+    .from("tickets")
+    .select("id, subject, status, priority, created_at")
+    .eq("system_id", systemId)
+    .eq("tenant_id", tenantId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (userId) q = q.eq("user_id", userId);
+  const { data } = await q;
+  return ((data ?? []) as Array<{
+    id: string;
+    subject: string;
+    status: string;
+    priority: Priority;
+    created_at: string;
+  }>).map((t) => ({
+    id: t.id,
+    subject: t.subject,
+    status: t.status,
+    priority: t.priority,
+    createdAt: t.created_at,
+  }));
+}
+
+/** Busca um ticket garantindo o escopo (sistema/tenant e usuário quando houver). */
+export async function getTicketScoped(
+  ticketId: string,
+  systemId: string,
+  tenantId: string,
+  userId: string | null,
+): Promise<{ id: string; chatId: string | null; subject: string; status: string; priority: Priority } | null> {
+  const db: DB = getServiceSupabase();
+  let q = db
+    .from("tickets")
+    .select("id, chat_id, subject, status, priority")
+    .eq("id", ticketId)
+    .eq("system_id", systemId)
+    .eq("tenant_id", tenantId);
+  if (userId) q = q.eq("user_id", userId);
+  const { data } = await q.maybeSingle();
+  if (!data) return null;
+  const t = data as { id: string; chat_id: string | null; subject: string; status: string; priority: Priority };
+  return { id: t.id, chatId: t.chat_id, subject: t.subject, status: t.status, priority: t.priority };
+}
+
+/** Chats vinculados aos tickets do escopo (para checar respostas do atendente). */
+export async function listTicketChatIds(
+  systemId: string,
+  tenantId: string,
+  userId: string | null,
+): Promise<string[]> {
+  const db: DB = getServiceSupabase();
+  let q = db
+    .from("tickets")
+    .select("chat_id")
+    .eq("system_id", systemId)
+    .eq("tenant_id", tenantId)
+    .not("chat_id", "is", null);
+  if (userId) q = q.eq("user_id", userId);
+  const { data } = await q;
+  return ((data ?? []) as Array<{ chat_id: string | null }>)
+    .map((r) => r.chat_id)
+    .filter((x): x is string => !!x);
+}
+
+/** Conta mensagens do atendente (admin) nesses chats criadas depois de `since`. */
+export async function countAdminMessagesSince(chatIds: string[], since: string): Promise<number> {
+  if (chatIds.length === 0) return 0;
+  const db: DB = getServiceSupabase();
+  const { data } = await db
+    .from("messages")
+    .select("id")
+    .in("chat_id", chatIds)
+    .eq("sender_type", "admin")
+    .gt("created_at", since)
+    .limit(100);
+  return (data ?? []).length;
+}

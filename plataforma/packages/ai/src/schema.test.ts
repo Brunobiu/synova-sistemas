@@ -46,6 +46,24 @@ describe("parseChatResult", () => {
     expect(r.suggestedPriority).toBe("media");
   });
 
+  it("aceita campos null (ex.: escalationReason) sem degradar", () => {
+    // Caso real do Gemini: manda escalationReason: null quando não escala.
+    const r = parseChatResult(
+      JSON.stringify({
+        answer: "Olá! Como posso ajudar você hoje?",
+        intent: "greeting",
+        urgency: "baixa",
+        confidence: 1,
+        shouldEscalate: false,
+        escalationReason: null,
+        suggestedPriority: "baixa",
+      }),
+    );
+    expect(r.answer).toBe("Olá! Como posso ajudar você hoje?");
+    expect(r.shouldEscalate).toBe(false);
+    expect(r.confidence).toBe(1);
+  });
+
   it("schema rejeita urgência inválida", () => {
     expect(chatResultSchema.safeParse({ answer: "x", urgency: "urgentíssimo" }).success).toBe(
       false,

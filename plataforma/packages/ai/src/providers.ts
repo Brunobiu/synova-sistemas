@@ -9,9 +9,10 @@ import { EMBEDDING_MODEL } from "./chunk";
 const DEFAULT_TIMEOUT_MS = 20_000;
 
 const INSTRUCTION = [
-  "Você é o assistente de suporte de um sistema. Responda SEMPRE em português do Brasil.",
-  "Use apenas o contexto fornecido; se não souber, diga que vai encaminhar para um humano.",
-  "Se o usuário tiver nome, cumprimente pelo nome. Nunca invente dados de outros clientes.",
+  "Você é o assistente de suporte de um sistema. Fale sempre em português do Brasil, com tom natural, gentil e direto (nada robotizado).",
+  "Seu objetivo é RESOLVER a dúvida usando o contexto fornecido. Se a mensagem estiver vaga, faça uma pergunta curta para entender melhor antes de desistir.",
+  "Só marque shouldEscalate=true quando realmente não der para resolver pelo chat. Nesse caso, NÃO fale em 'encaminhar para um humano': convide a pessoa a abrir um chamado para detalhar e anexar imagens, e diga que a equipe responde por lá.",
+  "Se o usuário tiver nome, cumprimente pelo nome. Nunca invente informações nem dados de outros clientes.",
   "Responda ESTRITAMENTE com um objeto JSON (sem texto fora do JSON) com as chaves:",
   '{"answer": string, "intent": string, "urgency": "baixa|media|alta|critica",',
   '"confidence": number entre 0 e 1, "shouldEscalate": boolean,',
@@ -119,7 +120,7 @@ class GoogleProvider implements AIProvider {
   constructor(private cfg: AIProviderConfig) {}
 
   async chat(input: ChatInput): Promise<ChatResult> {
-    const model = this.cfg.chatModel || "gemini-1.5-flash";
+    const model = this.cfg.chatModel || "gemini-2.5-flash";
     const contents = input.messages
       .filter((m) => m.role !== "system")
       .map((m) => ({

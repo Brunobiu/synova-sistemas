@@ -184,6 +184,17 @@ credenciais. A landing na raiz **não é tocada** em nenhuma tarefa.
     - _Requisitos: 8_
     - _Nota: migração `supabase/migrations/20260705120001_role_agent_access.sql` (idempotente) APLICADA na nuvem (verificado: `is_staff()` responde via RPC). Relaxa o check de `profiles.role` para (admin, agent), cria `is_staff()` e as policies de atendimento. Escopo por cliente (atendente ver só alguns sistemas) fica para a v2 (tabela `agent_systems`)._
 
+- [x] 17. Widget de suporte: tickets em modal, thread e histórico por cliente
+  - [x] 17.1 Tom da IA (resolve-first, pergunta para esclarecer, sugere chamado sem "humano") + widget (bolinha verde, "Abrir chamado" só no escalonamento, trava após o ticket + nova conversa); escalonamento deixa de criar ticket automático (vira sugestão)
+    - _Requisitos: 9, 10, 13_
+  - [x] 17.2 Modal de chamados no widget (aba Novo chamado com anexo + aba Meus chamados com status); `GET /api/widget/tickets`
+    - _Requisitos: 9, 12, 19_
+  - [x] 17.3 Thread do ticket (cliente↔suporte) no modal + notificação de volta (bolinha vermelha/badge por polling); `GET /api/widget/ticket-thread`, `POST /api/widget/ticket-message`, `GET /api/widget/updates`
+    - _Requisitos: 9, 12, 15_
+  - [x] 17.4 Histórico por cliente no painel (`/meu-atendimento/clientes`): conversas da IA + chamados de cada pessoa
+    - _Requisitos: 16, 21_
+    - _Nota: reaproveita chats/messages/tickets/notifications e a visão de conversa. `embed.js` regenerado (`pnpm --filter @synova/widget build`). Fluxo validado ao vivo contra o Supabase real. Evoluções: exibir a imagem/anexo dentro da thread do widget, e escopo por cliente do atendente (v2)._
+
 ---
 
 ## Observações

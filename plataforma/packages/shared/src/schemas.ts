@@ -32,6 +32,7 @@ export const widgetTicketSchema = z.object({
   subject: z.string().min(3).max(200),
   description: z.string().min(1).max(8000),
   priority: z.enum(PRIORITIES).optional(),
+  attachmentIds: z.array(z.string().uuid()).max(10).optional(),
 });
 export type WidgetTicketInput = z.infer<typeof widgetTicketSchema>;
 
@@ -41,6 +42,26 @@ export const widgetHistoryQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(30),
 });
 export type WidgetHistoryQuery = z.infer<typeof widgetHistoryQuerySchema>;
+
+/** Query para ver a thread de um ticket. */
+export const widgetTicketThreadQuerySchema = z.object({
+  ticketId: z.string().uuid(),
+});
+export type WidgetTicketThreadQuery = z.infer<typeof widgetTicketThreadQuerySchema>;
+
+/** Corpo de uma resposta do cliente na thread de um ticket. */
+export const widgetTicketMessageSchema = z.object({
+  ticketId: z.string().uuid(),
+  content: z.string().min(1).max(4000),
+  attachmentIds: z.array(z.string().uuid()).max(10).optional(),
+});
+export type WidgetTicketMessageInput = z.infer<typeof widgetTicketMessageSchema>;
+
+/** Query do "sino": novidades (respostas do atendente) desde um timestamp. */
+export const widgetUpdatesQuerySchema = z.object({
+  since: z.string().min(1).max(40),
+});
+export type WidgetUpdatesQuery = z.infer<typeof widgetUpdatesQuerySchema>;
 
 // --- Contratos de saída (respostas dos endpoints do widget) ---
 

@@ -33,6 +33,14 @@ export interface UploadResult {
   url: string;
 }
 
+export interface TicketItem {
+  id: string;
+  subject: string;
+  status: string;
+  priority: string;
+  createdAt: string;
+}
+
 type Envelope<T> = { ok: true; data: T } | { ok: false; code: string; message: string };
 
 export class WidgetApiError extends Error {
@@ -120,6 +128,7 @@ export class WidgetApi {
     subject: string;
     description: string;
     priority?: string;
+    attachmentIds?: string[];
   }): Promise<{ ticketId: string; status: string; priority: string }> {
     const res = await this.fetchImpl(this.url("/api/widget/ticket"), {
       method: "POST",
@@ -127,6 +136,46 @@ export class WidgetApi {
       body: JSON.stringify(input),
     });
     return this.unwrap<{ ticketId: string; status: string; priority: string }>(res);
+  }
+
+  async listTickets(): Promise<{ tickets: TicketItem[] }> {
+    const res = await this.fetchImpl(this.url("/api/widget/tickets"), {
+      method: "GET",
+      headers: this.authHeaders(false),
+    });
+    return this.unwrap<{ tickets: TicketItem[] }>(res);
+  }
+
+  async getTicketThread(ticketId: string): Promise<{
+    ticket: { id: string; subject: string; status: string; priority: string };
+    messages: MessageItem[];
+  }> {
+    const res = await this.fetchImpl(
+      this.url(`/api/widget/ticket-thread?ticketId=${encodeURIComponent(ticketId)}`),
+      { method: "GET", headers: this.authHeaders(false) },
+    );
+    return this.unwrap(res);
+  }
+
+  async sendTicketMessage(
+    ticketId: string,
+    content: string,
+    attachmentIds?: string[],
+  ): Promise<{ message: MessageItem }> {
+    const res = await this.fetchImpl(this.url("/api/widget/ticket-message"), {
+      method: "POST",
+      headers: this.authHeaders(true),
+      body: JSON.stringify({ ticketId, content, attachmentIds }),
+    });
+    return this.unwrap<{ message: MessageItem }>(res);
+  }
+
+  async getUpdates(since: string): Promise<{ newAdminMessages: number }> {
+    const res = await this.fetchImpl(
+      this.url(`/api/widget/updates?since=${encodeURIComponent(since)}`),
+      { method: "GET", headers: this.authHeaders(false) },
+    );
+    return this.unwrap<{ newAdminMessages: number }>(res);
   }
 
   async upload(file: File): Promise<UploadResult> {

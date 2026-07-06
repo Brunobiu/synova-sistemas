@@ -220,57 +220,14 @@ export async function handleMessage(
     provider: provider?.name ?? "none",
   });
 
-  let ticketId: string | undefined;
-  if (outcome.escalation.escalate) {
-    ticketId = await data.createTicket({
-      chatId: chat.id,
-      systemId: scope.systemId,
-      tenantId: scope.tenantId,
-      userId: session.user_id,
-      category: outcome.result.intent || "suporte",
-      subject: deriveSubject(input.content),
-      description: input.content,
-      priority: outcome.escalation.priority,
-      status: "escalated",
-      escalationReason: outcome.escalation.reason,
-    });
-    await data.setChatStatus(chat.id, "human_active");
-    await data.insertTicketEvent({
-      ticketId,
-      systemId: scope.systemId,
-      tenantId: scope.tenantId,
-      actorType: "ai",
-      toStatus: "escalated",
-      note: outcome.escalation.reason,
-    });
-    await data.createNotification({
-      systemId: scope.systemId,
-      tenantId: scope.tenantId,
-      type: notificationTypeForEscalation(outcome.escalation.immediate),
-      priority: outcome.escalation.priority,
-      title: outcome.escalation.immediate ? "Ticket CRÍTICO" : "Atendimento escalado para humano",
-      body: outcome.escalation.reason,
-      entityType: "ticket",
-      entityId: ticketId,
-    });
-    await data.insertAudit({
-      systemId: scope.systemId,
-      tenantId: scope.tenantId,
-      actorType: "ai",
-      action: "widget.escalation",
-      targetType: "ticket",
-      targetId: ticketId,
-      ip,
-      metadata: { reason: outcome.escalation.reason, priority: outcome.escalation.priority },
-    });
-  }
-
+  // Escalonamento agora é uma SUGESTÃO (não cria ticket automático): a IA convida
+  // a pessoa a abrir um chamado, e o ticket nasce quando ela envia pelo modal
+  // (fluxo openTicket). Aqui só sinalizamos para o widget oferecer o "Abrir chamado".
   return {
     ok: true,
     messageId: userMsg.id,
     reply: outcome.answer,
     escalated: outcome.escalation.escalate,
-    ticketId,
   };
 }
 
@@ -280,6 +237,7 @@ export interface OpenTicketInput {
   subject: string;
   description: string;
   priority?: "baixa" | "media" | "alta" | "critica";
+  attachmentIds?: string[];
 }
 
 export async function openTicket(scope: WidgetScope, input: OpenTicketInput, ip: string) {
@@ -303,6 +261,25 @@ export async function openTicket(scope: WidgetScope, input: OpenTicketInput, ip:
     priority,
     status: "open",
   });
+  // A descrição do cliente vira a 1ª mensagem da thread do ticket (no chat vinculado);
+  // daqui em diante a conversa desse ticket é humana.
+  if (chatId) {
+    const firstMsg = await data.insertMessage({
+      chatId,
+      systemId: scope.systemId,
+      tenantId: scope.tenantId,
+      senderType: "user",
+      senderId: scope.externalRef ?? scope.userId ?? null,
+      content: input.description,
+    });
+    if (input.attachmentIds?.length) {
+      await data.linkAttachments(input.attachmentIds, firstMsg.id, scope.systemId);
+    }
+    await data.setChatStatus(chatId, "human_active");
+  }
+  if (input.attachmentIds?.length) {
+    await data.linkAttachmentsToTicket(input.attachmentIds, ticketId, scope.systemId);
+  }
   await data.insertTicketEvent({
     ticketId,
     systemId: scope.systemId,
@@ -331,7 +308,83 @@ export async function openTicket(scope: WidgetScope, input: OpenTicketInput, ip:
     targetId: ticketId,
     ip,
   });
-  return { ticketId, status: "open", priority };
+  return { ticketId, status: "open", priority, chatId };
+}
+
+/** Thread de um ticket (mensagens do chat vinculado), escopada pelo token. */
+export async function getTicketThread(scope: WidgetScope, ticketId: string) {
+  const ticket = await data.getTicketScoped(
+    ticketId,
+    scope.systemId,
+    scope.tenantId,
+    scope.userId ?? null,
+  );
+  if (!ticket) return { ok: false as const, error: "Chamado não encontrado." };
+  const messages = ticket.chatId ? await data.listMessages(ticket.chatId, 200) : [];
+  return {
+    ok: true as const,
+    ticket: { id: ticket.id, subject: ticket.subject, status: ticket.status, priority: ticket.priority },
+    messages,
+  };
+}
+
+/** Cliente responde na thread de um ticket (não aciona IA; é conversa humana). */
+export async function addTicketMessage(
+  scope: WidgetScope,
+  ticketId: string,
+  content: string,
+  attachmentIds: string[] | undefined,
+) {
+  const ticket = await data.getTicketScoped(
+    ticketId,
+    scope.systemId,
+    scope.tenantId,
+    scope.userId ?? null,
+  );
+  if (!ticket || !ticket.chatId) return { ok: false as const, error: "Chamado não encontrado." };
+  const msg = await data.insertMessage({
+    chatId: ticket.chatId,
+    systemId: scope.systemId,
+    tenantId: scope.tenantId,
+    senderType: "user",
+    senderId: scope.externalRef ?? scope.userId ?? null,
+    content,
+  });
+  if (attachmentIds?.length) {
+    await data.linkAttachments(attachmentIds, msg.id, scope.systemId);
+  }
+  await data.createNotification({
+    systemId: scope.systemId,
+    tenantId: scope.tenantId,
+    type: "new_ticket",
+    priority: "media",
+    title: "Cliente respondeu num chamado",
+    body: content.slice(0, 120),
+    entityType: "ticket",
+    entityId: ticketId,
+  });
+  return { ok: true as const, message: msg };
+}
+
+/** Quantidade de respostas do atendente (admin) desde `since`, para o "sino" do widget. */
+export async function getUpdates(scope: WidgetScope, since: string) {
+  const chatIds = await data.listTicketChatIds(
+    scope.systemId,
+    scope.tenantId,
+    scope.userId ?? null,
+  );
+  const newAdminMessages = await data.countAdminMessagesSince(chatIds, since);
+  return { newAdminMessages };
+}
+
+/** Lista os tickets do cliente (escopado por usuário/tenant do token). */
+export async function listUserTickets(scope: WidgetScope) {
+  const tickets = await data.listTicketsForScope(
+    scope.systemId,
+    scope.tenantId,
+    scope.userId ?? null,
+  );
+  return { tickets };
 }
 
 export async function getHistory(scope: WidgetScope, sessionId: string | undefined, limit: number) {

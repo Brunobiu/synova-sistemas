@@ -41,10 +41,19 @@ export function extractJson(text: string): unknown {
  * para uma resposta que sinaliza baixa confiança e sugere escalonamento — nunca
  * lança, para não derrubar o atendimento.
  */
+/** Remove chaves com valor null (modelos às vezes mandam null; deixa os defaults/opcionais valerem). */
+function stripNulls(obj: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v !== null) out[k] = v;
+  }
+  return out;
+}
+
 export function parseChatResult(raw: string): ChatResult {
   const json = extractJson(raw);
   if (json && typeof json === "object") {
-    const parsed = chatResultSchema.safeParse(json);
+    const parsed = chatResultSchema.safeParse(stripNulls(json as Record<string, unknown>));
     if (parsed.success) return parsed.data;
   }
   // Fallback: usa o texto bruto como resposta, com baixa confiança.

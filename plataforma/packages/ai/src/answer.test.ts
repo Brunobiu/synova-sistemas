@@ -26,11 +26,11 @@ const baseParams = (provider: AIProvider | null) => ({
 });
 
 describe("answerMessage — degradação graciosa", () => {
-  it("sem provedor ativo, encaminha para humano", async () => {
+  it("sem provedor ativo, sugere abrir chamado", async () => {
     const out = await answerMessage(baseParams(null));
     expect(out.aiAvailable).toBe(false);
     expect(out.escalation.escalate).toBe(true);
-    expect(out.answer).toMatch(/humano|atendente/i);
+    expect(out.answer).toMatch(/chamado|equipe/i);
   });
 
   it("quando o provedor lança erro, encaminha para humano", async () => {

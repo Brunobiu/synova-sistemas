@@ -30,7 +30,7 @@ describe("isNavActive", () => {
 
 describe("visibleNavFor", () => {
   it("admin vê todos os itens (ERP + atendimento + landing)", () => {
-    expect(visibleNavFor("admin")).toHaveLength(7);
+    expect(visibleNavFor("admin")).toHaveLength(8);
   });
 
   it("agent vê só os itens de atendimento", () => {
@@ -38,6 +38,7 @@ describe("visibleNavFor", () => {
       "Atendimento",
       "Notificações",
       "Métricas",
+      "Clientes",
     ]);
   });
 });

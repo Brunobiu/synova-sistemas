@@ -26,7 +26,7 @@ export interface AnswerOutcome {
 const DEFAULT_TIMEOUT_MS = 20_000;
 
 const FALLBACK_MESSAGE =
-  "Recebi sua mensagem e vou encaminhar para um atendente humano. Em breve alguém retorna por aqui.";
+  "Recebi sua mensagem! Para eu te ajudar melhor com isso, você pode abrir um chamado detalhando o que precisa — dá para anexar imagens. Assim a equipe já dá sequência pra você.";
 
 function degraded(reason: string, aiAvailable: boolean, errored: boolean): AnswerOutcome {
   const result: ChatResult = {

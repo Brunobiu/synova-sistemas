@@ -18,13 +18,24 @@ function start(config: WidgetConfig) {
   let connected = false;
   let polling: ReturnType<typeof setInterval> | null = null;
   let pendingAttachments: string[] = [];
+  let pendingTicketAttachments: string[] = [];
+  let activeTicketId: string | null = null;
+  let threadPoll: ReturnType<typeof setInterval> | null = null;
+  let updatesPoll: ReturnType<typeof setInterval> | null = null;
   const storageKey = `synova_session_${config.apiKey}`;
+  const seenKey = `synova_seen_${config.apiKey}`;
 
   const ui = new WidgetUI(config, {
     onOpen: connect,
     onSend: handleSend,
     onAttach: handleAttach,
     onOpenTicket: handleTicket,
+    onNewChat: resetChat,
+    onSubmitTicket: submitTicket,
+    onAttachTicket: attachTicket,
+    onOpenThread: openThread,
+    onSendThreadMessage: sendThreadMessage,
+    onCloseThread: closeThread,
   });
   ui.mount();
 
@@ -37,11 +48,13 @@ function start(config: WidgetConfig) {
       safeSet(storageKey, sessionId);
       connected = true;
       ui.renderHistory(result.history);
-      ui.setStatus(result.user.name ? `Olá, ${result.user.name}!` : "Conectado");
+      ui.setStatus(result.user.name ? `Olá, ${result.user.name}!` : "Conectado", true);
+      if (!safeGet(seenKey)) safeSet(seenKey, new Date().toISOString());
       startPolling();
+      startUpdatesPolling();
       void flushQueue();
     } catch {
-      ui.setStatus("Sem conexão. Tentaremos novamente.");
+      ui.setStatus("Sem conexão. Tentaremos novamente.", false);
     }
   }
 
@@ -62,11 +75,11 @@ function start(config: WidgetConfig) {
     try {
       const res = await api.sendMessage(sessionId!, msg.content, msg.attachmentIds);
       if (res.reply) ui.addMessage({ id: res.messageId + "-ai", senderType: "ai", content: res.reply, createdAt: new Date().toISOString() });
-      if (res.escalated) ui.addLocal("Encaminhamos para um atendente humano.", "system");
-      ui.setStatus("Conectado");
+      if (res.escalated) ui.showTicketAction();
+      ui.setStatus("Conectado", true);
     } catch {
       queue.enqueue(msg);
-      ui.setStatus("Offline: mensagem na fila.");
+      ui.setStatus("Offline: mensagem na fila.", false);
     }
   }
 
@@ -88,21 +101,137 @@ function start(config: WidgetConfig) {
     }
   }
 
-  async function handleTicket() {
-    const subject = window.prompt("Assunto do chamado:");
-    if (!subject) return;
-    const description = window.prompt("Descreva o problema:") ?? subject;
+  function handleTicket() {
+    ui.openTicketModal();
+    void loadTickets();
+  }
+
+  async function loadTickets() {
+    if (!connected) return;
     try {
-      const res = await api.openTicket({
+      const { tickets } = await api.listTickets();
+      ui.renderTickets(tickets);
+      markSeen();
+    } catch {
+      /* silencioso: a aba de lista simplesmente fica vazia */
+    }
+  }
+
+  async function openThread(ticketId: string) {
+    activeTicketId = ticketId;
+    try {
+      const { ticket, messages } = await api.getTicketThread(ticketId);
+      ui.openThreadView(ticket.subject);
+      ui.renderThreadMessages(messages);
+    } catch {
+      ui.openThreadView("Chamado");
+    }
+    startThreadPolling();
+    markSeen();
+  }
+
+  function closeThread() {
+    activeTicketId = null;
+    if (threadPoll) {
+      clearInterval(threadPoll);
+      threadPoll = null;
+    }
+  }
+
+  async function sendThreadMessage(content: string) {
+    if (!activeTicketId) return;
+    try {
+      const { message } = await api.sendTicketMessage(activeTicketId, content);
+      ui.addThreadMessage(message);
+    } catch {
+      /* silencioso */
+    }
+  }
+
+  function startThreadPolling() {
+    if (threadPoll) return;
+    threadPoll = setInterval(async () => {
+      if (!activeTicketId) return;
+      try {
+        const { messages } = await api.getTicketThread(activeTicketId);
+        for (const m of messages) ui.addThreadMessage(m);
+      } catch {
+        /* silencioso */
+      }
+    }, 5000);
+  }
+
+  function getSeen(): string {
+    return safeGet(seenKey) ?? new Date(0).toISOString();
+  }
+
+  function markSeen() {
+    safeSet(seenKey, new Date().toISOString());
+    ui.setUnread(0);
+  }
+
+  function startUpdatesPolling() {
+    if (updatesPoll) return;
+    updatesPoll = setInterval(pollUpdates, 10000);
+    void pollUpdates();
+  }
+
+  async function pollUpdates() {
+    if (!connected) return;
+    try {
+      const { newAdminMessages } = await api.getUpdates(getSeen());
+      ui.setUnread(newAdminMessages);
+    } catch {
+      /* silencioso */
+    }
+  }
+
+  async function attachTicket(file: File) {
+    try {
+      const res = await api.upload(file);
+      pendingTicketAttachments.push(res.attachmentId);
+      ui.addTicketAttachment(res.fileName);
+    } catch {
+      ui.setTicketResult("Não foi possível anexar o arquivo.");
+    }
+  }
+
+  async function submitTicket(input: { subject: string; description: string }) {
+    const description = input.description.trim();
+    if (description.length < 3) {
+      ui.setTicketResult("Descreva um pouco mais o que você precisa.");
+      return;
+    }
+    const subject = input.subject.trim() || description.slice(0, 60);
+    try {
+      await api.openTicket({
         sessionId: sessionId ?? undefined,
         category: "suporte",
         subject,
         description,
+        attachmentIds: pendingTicketAttachments,
       });
-      ui.addLocal(`Chamado aberto (prioridade ${res.priority}).`, "system");
+      pendingTicketAttachments = [];
+      ui.clearTicketForm();
+      ui.setTicketResult("Enviado ✓ A equipe vai responder por aqui.");
+      await loadTickets();
+      ui.switchTab("list");
+      ui.lockComposer("Chamado aberto — inicie uma nova conversa se precisar.");
     } catch {
-      ui.addLocal("Não foi possível abrir o chamado.", "system");
+      ui.setTicketResult("Não foi possível enviar. Tente de novo.");
     }
+  }
+
+  function resetChat() {
+    connected = false;
+    sessionId = null;
+    safeRemove(storageKey);
+    if (polling) {
+      clearInterval(polling);
+      polling = null;
+    }
+    ui.reset();
+    void connect();
   }
 
   function startPolling() {
@@ -131,6 +260,13 @@ function safeGet(key: string): string | null {
 function safeSet(key: string, value: string): void {
   try {
     window.localStorage.setItem(key, value);
+  } catch {
+    /* localStorage indisponível */
+  }
+}
+function safeRemove(key: string): void {
+  try {
+    window.localStorage.removeItem(key);
   } catch {
     /* localStorage indisponível */
   }

@@ -17,6 +17,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { label: "Atendimento", href: "/meu-atendimento", area: "support" },
   { label: "Notificações", href: "/meu-atendimento/notificacoes", area: "support" },
   { label: "Métricas", href: "/meu-atendimento/metricas", area: "support" },
+  { label: "Clientes", href: "/meu-atendimento/clientes", area: "support" },
   { label: "Landing page", href: "/erp/landing", area: "erp" },
 ];
 
