@@ -7,10 +7,15 @@ import { computeMetrics, type Metrics } from "./metrics-util";
 
 export async function getMetrics(): Promise<Metrics> {
   const db = await getServerSupabase();
-  const [ticketsRes, chatsRes, systemsRes] = await Promise.all([
+  const [ticketsRes, chatsRes, systemsRes, messagesRes] = await Promise.all([
     db.from("tickets").select("priority, status, system_id, chat_id").limit(5000),
     db.from("chats").select("id, status").limit(5000),
     db.from("systems").select("id, name"),
+    db
+      .from("messages")
+      .select("chat_id, sender_type, created_at")
+      .order("created_at", { ascending: true })
+      .limit(20000),
   ]);
 
   const tickets = ((ticketsRes.data ?? []) as Array<{
@@ -32,5 +37,15 @@ export async function getMetrics(): Promise<Metrics> {
     systemNames[s.id] = s.name;
   }
 
-  return computeMetrics({ tickets, chats, systemNames });
+  const messages = ((messagesRes.data ?? []) as Array<{
+    chat_id: string;
+    sender_type: string;
+    created_at: string;
+  }>).map((row) => ({
+    chatId: row.chat_id,
+    senderType: row.sender_type,
+    createdAt: row.created_at,
+  }));
+
+  return computeMetrics({ tickets, chats, systemNames, messages });
 }

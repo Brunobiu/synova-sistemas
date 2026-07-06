@@ -158,7 +158,7 @@ credenciais. A landing (`apps/admin/public`) é a área do front-end e **não é
     - _Requisitos: 21_
   - [x] 14.3 Testes das agregações e do escopo
     - _Requisitos: 21, 24_
-    - _Nota: auditoria cobre escalonamento, transições/reclassificação de ticket, ações do painel, rotação de chave e acesso negado. Dashboard em `/meu-atendimento/metricas` (tickets por sistema/prioridade/status, taxa de escalonamento e de resolução automática). Tempos médios IA/humano e satisfação (CSAT) ficam para evolução (exigem timestamps por mensagem e mecanismo de avaliação). Agregação testada; isolamento garantido por RLS (testes do Bloco 2)._
+    - _Nota: auditoria cobre escalonamento, transições/reclassificação de ticket, ações do painel, rotação de chave e acesso negado. Dashboard em `/meu-atendimento/metricas` (tickets por sistema/prioridade/status, taxa de escalonamento e de resolução automática, e **tempos médios de resposta IA/humano** calculados a partir de `messages`: da última fala do cliente até a resposta seguinte). Satisfação (CSAT) fica para evolução (exige mecanismo de avaliação no widget). Agregação testada (`metrics-util.test.ts`); isolamento garantido por RLS (testes do Bloco 2)._
 
 - [x] 15. Qualidade, resiliência e portões de pré-deploy
   - [x] 15.1 Suíte obrigatória de isolamento multi-tenant + segurança + contratos como portão de CI
