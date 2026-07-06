@@ -16,7 +16,7 @@ export async function getServerSupabase() {
         );
       } catch {
         // Em Server Components os cookies são read-only; o refresh de sessão
-        // acontece no middleware. Ignorar aqui é seguro.
+        // acontece no proxy (Next.js 16). Ignorar aqui é seguro.
       }
     },
   });

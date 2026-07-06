@@ -1,5 +1,5 @@
 // Regras puras de proteção de rota (sem dependência de Supabase),
-// usadas pelo middleware e testáveis isoladamente.
+// usadas pelo proxy (Next.js 16) e testáveis isoladamente.
 
 export const PROTECTED_PREFIXES = ["/erp", "/meu-atendimento", "/api/admin"] as const;
 
